@@ -1,0 +1,82 @@
+{
+  "version": "1.0",
+  "sharepoint_paths": {
+    "source_dir": "/Users/yamamotohikaru/Desktop/all_coda/Houkoku_WH/houkoku_data/source",
+    "reports_dir": "/Users/yamamotohikaru/Desktop/all_coda/Houkoku_WH/houkoku_data/reports"
+  },
+  "report_definitions": [
+    {
+      "report_id": "RPT-001",
+      "report_name": "排水分析報告",
+      "search_filters": {
+        "protocol_name": [
+          "PROT-RELEASE-02"
+        ]
+      },
+      "description": "排水関連の分析報告"
+    },
+    {
+      "report_id": "RPT-002",
+      "report_name": "工程管理報告",
+      "search_filters": {
+        "protocol_name": [
+          "PROT-INPROCESS-03"
+        ]
+      },
+      "description": "工程管理の分析報告"
+    }
+  ],
+  "departments": [
+    {
+      "dept_id": "DEPT-A",
+      "dept_name": "製造1課",
+      "folder_name": "製造1課",
+      "allowed_samples": {
+        "RPT-001": [
+          "VSSET_0144",
+          "VSSET_0143",
+          "VSSET_0145"
+        ],
+        "RPT-002": [
+          "VSSET_0096",
+          "VSSET_0093"
+        ]
+      }
+    },
+    {
+      "dept_id": "DEPT-B",
+      "dept_name": "製造2課",
+      "folder_name": "製造2課",
+      "allowed_samples": {
+        "RPT-001": [
+          "VSSET_0082",
+          "VSSET_0084"
+        ],
+        "RPT-002": [
+          "VSSET_0141",
+          "VSSET_0142"
+        ]
+      }
+    },
+    {
+      "dept_id": "DEPT-C",
+      "dept_name": "品質管理課",
+      "folder_name": "品質管理課",
+      "allowed_samples": {
+        "RPT-001": [
+          "VSSET_0144",
+          "VSSET_0143",
+          "VSSET_0145",
+          "VSSET_0082",
+          "VSSET_0084"
+        ],
+        "RPT-002": [
+          "VSSET_0096",
+          "VSSET_0093",
+          "VSSET_0141",
+          "VSSET_0142"
+        ]
+      }
+    }
+  ]
+}

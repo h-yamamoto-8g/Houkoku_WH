@@ -1,0 +1,54 @@
+[
+  {
+    "task_id": "20260226075840_HG_001",
+    "submitted_at": "2026-03-03T07:20:15.022712",
+    "sample_request_number": "2154081",
+    "sample_job_number": "251007W",
+    "valid_sample_set_code": "VSSET_0084",
+    "valid_holder_set_code": "VHSET_0028",
+    "valid_test_set_code": "VTSET_0122",
+    "valid_sample_display_name": "東動力取水(海水)",
+    "valid_test_display_name": "vtset_0122",
+    "test_raw_data": "7.89",
+    "test_unit_name": "-"
+  },
+  {
+    "task_id": "20260226075840_HG_001",
+    "submitted_at": "2026-03-03T07:20:15.022712",
+    "sample_request_number": "2143996",
+    "sample_job_number": "251007W",
+    "valid_sample_set_code": "VSSET_0081",
+    "valid_holder_set_code": "VHSET_0028",
+    "valid_test_set_code": "VTSET_0122",
+    "valid_sample_display_name": "沈殿池出口排水",
+    "valid_test_display_name": "vtset_0122",
+    "test_raw_data": "8.53",
+    "test_unit_name": "-"
+  },
+  {
+    "task_id": "20260226075840_HG_001",
+    "submitted_at": "2026-03-03T07:20:15.022712",
+    "sample_request_number": "2143988",
+    "sample_job_number": "251007W",
+    "valid_sample_set_code": "VSSET_0076",
+    "valid_holder_set_code": "VHSET_0028",
+    "valid_test_set_code": "VTSET_0122",
+    "valid_sample_display_name": "P-4",
+    "valid_test_display_name": "vtset_0122",
+    "test_raw_data": "7.75",
+    "test_unit_name": "-"
+  },
+  {
+    "task_id": "20260226075840_HG_001",
+    "submitted_at": "2026-03-03T07:20:15.022712",
+    "sample_request_number": "2143987",
+    "sample_job_number": "251007W",
+    "valid_sample_set_code": "VSSET_0075",
+    "valid_holder_set_code": "VHSET_0028",
+    "valid_test_set_code": "VTSET_0122",
+    "valid_sample_display_name": "P-3",
+    "valid_test_display_name": "vtset_0122",
+    "test_raw_data": "7.75",
+    "test_unit_name": "-"
+  }
+]

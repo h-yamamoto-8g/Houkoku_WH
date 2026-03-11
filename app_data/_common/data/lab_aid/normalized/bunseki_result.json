@@ -1,0 +1,33 @@
+{
+  "status": "success",
+  "command": "build",
+  "steps": {
+    "merge": {
+      "ran": true,
+      "ms": 2342
+    },
+    "normalize": {
+      "ran": true,
+      "ms": 8014
+    },
+    "extract": {
+      "ran": true,
+      "ms": 7640
+    }
+  },
+  "outputs": {
+    "full_csv": "C:\\Users\\12414\\トクヤマグループ\\環境分析課 - ドキュメント\\app_data\\_common\\data\\lab_aid\\merged\\full.csv",
+    "full_normalized_csv": "C:\\Users\\12414\\トクヤマグループ\\環境分析課 - ドキュメント\\app_data\\_common\\data\\lab_aid\\normalized\\full_normalized.csv",
+    "output_csv": "C:\\Users\\12414\\トクヤマグループ\\環境分析課 - ドキュメント\\app_data\\_common\\data\\lab_aid\\normalized\\bunseki.csv"
+  },
+  "rows": {
+    "input_rows": 380402,
+    "output_rows": 268171
+  },
+  "unknown_counts": {
+    "sample": 19757,
+    "holder": 68733,
+    "test": 112231
+  },
+  "execution_time_ms": 17998
+}

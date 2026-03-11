@@ -1,0 +1,840 @@
+[
+  {
+    "task_id": "20260226075259_HG_002",
+    "task_name": "20260226075259_SS",
+    "holder_group_code": "HG_002",
+    "holder_group_name": "SS",
+    "job_numbers": [
+      "260106W"
+    ],
+    "current_state": "result_verification",
+    "status": "進行中",
+    "created_at": "2026-02-26T07:52:59.275778",
+    "updated_at": "2026-03-03T06:00:36.097992",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_002",
+        "holder_group_name": "SS",
+        "job_numbers": [
+          "260106W"
+        ],
+        "completed": true
+      },
+      "analysis_targets": {
+        "valid_sample_set_codes": [
+          "VSSET_0155",
+          "VSSET_0141",
+          "VSSET_0139",
+          "VSSET_0126",
+          "VSSET_0124",
+          "VSSET_0114",
+          "VSSET_0109",
+          "VSSET_0096",
+          "VSSET_0093",
+          "VSSET_0092",
+          "VSSET_0091",
+          "VSSET_0090",
+          "VSSET_0088",
+          "VSSET_0087",
+          "VSSET_0086",
+          "VSSET_0085",
+          "VSSET_0084",
+          "VSSET_0083",
+          "VSSET_0082",
+          "VSSET_0081",
+          "VSSET_0079",
+          "VSSET_0078",
+          "VSSET_0074",
+          "VSSET_0072",
+          "VSSET_0071"
+        ],
+        "deleted_codes": [],
+        "added_samples": [],
+        "completed": true
+      },
+      "analysis": {
+        "pre_checks": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "post_checks": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "completed": true
+      },
+      "result_entry": {
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260226075840_HG_001",
+    "task_name": "20260226075840_pH",
+    "holder_group_code": "HG_001",
+    "holder_group_name": "pH",
+    "job_numbers": [
+      "251007W"
+    ],
+    "current_state": "submission",
+    "status": "回覧中",
+    "created_at": "2026-02-26T07:58:40.328629",
+    "updated_at": "2026-03-03T07:39:31.459583",
+    "created_by": "デモユーザー",
+    "assigned_to": "山本輝",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_001",
+        "holder_group_name": "pH",
+        "job_numbers": [
+          "251007W"
+        ],
+        "completed": true
+      },
+      "analysis_targets": {
+        "valid_sample_set_codes": [
+          "VSSET_0084",
+          "VSSET_0141",
+          "VSSET_0126",
+          "VSSET_0124",
+          "VSSET_0096",
+          "VSSET_0092",
+          "VSSET_0091",
+          "VSSET_0090",
+          "VSSET_0088",
+          "VSSET_0087",
+          "VSSET_0086",
+          "VSSET_0085",
+          "VSSET_0083",
+          "VSSET_0082",
+          "VSSET_0081",
+          "VSSET_0079",
+          "VSSET_0078",
+          "VSSET_0077",
+          "VSSET_0076",
+          "VSSET_0075",
+          "VSSET_0074",
+          "VSSET_0073",
+          "VSSET_0072",
+          "VSSET_0071"
+        ],
+        "deleted_codes": [
+          "VSSET_0093"
+        ],
+        "added_samples": [],
+        "completed": true
+      },
+      "analysis": {
+        "pre_checks": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "post_checks": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "completed": true
+      },
+      "result_entry": {
+        "completed": true
+      },
+      "result_verification": {
+        "checks": [
+          true,
+          true,
+          true
+        ],
+        "completed": true
+      },
+      "submission": {
+        "reviewers": [
+          "山本輝"
+        ],
+        "current_reviewer_index": 0,
+        "comment": "test",
+        "attachments": [
+          "/Users/yamamotohikaru/Desktop/Bunseki/app_data/bunseki/attachments/20260226075840_HG_001/requirements.txt"
+        ],
+        "completed": false,
+        "comments": [
+          {
+            "id": "cm_316d72cdf11b41e8bc7bf907170d7de8",
+            "author": "山本輝",
+            "text": "test",
+            "created_at": "2026-03-03T07:39:31.459199",
+            "pending": true
+          }
+        ]
+      }
+    },
+    "handover_history": [
+      {
+        "from": "デモユーザー",
+        "to": "山本輝",
+        "by": "山本輝",
+        "at": "2026-03-03T06:40:17.368811"
+      }
+    ]
+  },
+  {
+    "task_id": "20260302012753_HG_001",
+    "task_name": "20260302012753_pH",
+    "holder_group_code": "HG_001",
+    "holder_group_name": "pH",
+    "job_numbers": [
+      "250107W"
+    ],
+    "current_state": "analysis_targets",
+    "status": "進行中",
+    "created_at": "2026-03-02T01:27:53.681528",
+    "updated_at": "2026-03-02T01:27:53.681528",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_001",
+        "holder_group_name": "pH",
+        "job_numbers": [
+          "250107W"
+        ],
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260302071403_HG_001",
+    "task_name": "20260302071403_pH",
+    "holder_group_code": "HG_001",
+    "holder_group_name": "pH",
+    "job_numbers": [
+      "260105W"
+    ],
+    "current_state": "result_verification",
+    "status": "進行中",
+    "created_at": "2026-03-02T07:14:03.296125",
+    "updated_at": "2026-03-02T07:47:22.770678",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_001",
+        "holder_group_name": "pH",
+        "job_numbers": [
+          "260105W"
+        ],
+        "completed": true
+      },
+      "analysis_targets": {
+        "valid_sample_set_codes": [
+          "VSSET_0106",
+          "VSSET_0104",
+          "VSSET_0100"
+        ],
+        "deleted_codes": [],
+        "added_samples": [],
+        "completed": true
+      },
+      "analysis": {
+        "pre_checks": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "post_checks": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "completed": true
+      },
+      "result_entry": {
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260302074556_HG_002",
+    "task_name": "20260302074556_SS",
+    "holder_group_code": "HG_002",
+    "holder_group_name": "SS",
+    "job_numbers": [
+      "250107W"
+    ],
+    "current_state": "analysis_targets",
+    "status": "進行中",
+    "created_at": "2026-03-02T07:45:56.647788",
+    "updated_at": "2026-03-02T07:45:56.647788",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_002",
+        "holder_group_name": "SS",
+        "job_numbers": [
+          "250107W"
+        ],
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260303031008_HG_001",
+    "task_name": "20260303031008_pH",
+    "holder_group_code": "HG_001",
+    "holder_group_name": "pH",
+    "job_numbers": [
+      "260107W"
+    ],
+    "current_state": "analysis_targets",
+    "status": "進行中",
+    "created_at": "2026-03-03T03:10:08.729412",
+    "updated_at": "2026-03-03T03:10:08.729412",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_001",
+        "holder_group_name": "pH",
+        "job_numbers": [
+          "260107W"
+        ],
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260303031010_HG_001",
+    "task_name": "20260303031010_pH",
+    "holder_group_code": "HG_001",
+    "holder_group_name": "pH",
+    "job_numbers": [
+      "260107W"
+    ],
+    "current_state": "analysis_targets",
+    "status": "進行中",
+    "created_at": "2026-03-03T03:10:10.530553",
+    "updated_at": "2026-03-03T03:10:10.530553",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_001",
+        "holder_group_name": "pH",
+        "job_numbers": [
+          "260107W"
+        ],
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260303031011_HG_001",
+    "task_name": "20260303031011_pH",
+    "holder_group_code": "HG_001",
+    "holder_group_name": "pH",
+    "job_numbers": [
+      "260107W"
+    ],
+    "current_state": "analysis_targets",
+    "status": "進行中",
+    "created_at": "2026-03-03T03:10:11.469408",
+    "updated_at": "2026-03-03T06:40:34.834981",
+    "created_by": "デモユーザー",
+    "assigned_to": "山本輝",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_001",
+        "holder_group_name": "pH",
+        "job_numbers": [
+          "260107W"
+        ],
+        "completed": true
+      }
+    },
+    "handover_history": [
+      {
+        "from": "デモユーザー",
+        "to": "山本輝",
+        "by": "山本輝",
+        "at": "2026-03-03T06:40:34.834981"
+      }
+    ]
+  },
+  {
+    "task_id": "20260303031011_HG_001",
+    "task_name": "20260303031011_pH",
+    "holder_group_code": "HG_001",
+    "holder_group_name": "pH",
+    "job_numbers": [
+      "260107W"
+    ],
+    "current_state": "analysis_targets",
+    "status": "進行中",
+    "created_at": "2026-03-03T03:10:11.601220",
+    "updated_at": "2026-03-03T03:10:11.601220",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_001",
+        "holder_group_name": "pH",
+        "job_numbers": [
+          "260107W"
+        ],
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260303031011_HG_001",
+    "task_name": "20260303031011_pH",
+    "holder_group_code": "HG_001",
+    "holder_group_name": "pH",
+    "job_numbers": [
+      "260107W"
+    ],
+    "current_state": "analysis_targets",
+    "status": "進行中",
+    "created_at": "2026-03-03T03:10:11.742655",
+    "updated_at": "2026-03-03T03:10:11.742655",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_001",
+        "holder_group_name": "pH",
+        "job_numbers": [
+          "260107W"
+        ],
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260303031011_HG_001",
+    "task_name": "20260303031011_pH",
+    "holder_group_code": "HG_001",
+    "holder_group_name": "pH",
+    "job_numbers": [
+      "260107W"
+    ],
+    "current_state": "analysis_targets",
+    "status": "進行中",
+    "created_at": "2026-03-03T03:10:11.863449",
+    "updated_at": "2026-03-03T03:10:11.863449",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_001",
+        "holder_group_name": "pH",
+        "job_numbers": [
+          "260107W"
+        ],
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260303031012_HG_001",
+    "task_name": "20260303031012_pH",
+    "holder_group_code": "HG_001",
+    "holder_group_name": "pH",
+    "job_numbers": [
+      "260107W"
+    ],
+    "current_state": "analysis_targets",
+    "status": "進行中",
+    "created_at": "2026-03-03T03:10:12.447788",
+    "updated_at": "2026-03-03T03:10:12.447788",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_001",
+        "holder_group_name": "pH",
+        "job_numbers": [
+          "260107W"
+        ],
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260303031012_HG_001",
+    "task_name": "20260303031012_pH",
+    "holder_group_code": "HG_001",
+    "holder_group_name": "pH",
+    "job_numbers": [
+      "260107W"
+    ],
+    "current_state": "analysis_targets",
+    "status": "進行中",
+    "created_at": "2026-03-03T03:10:12.606103",
+    "updated_at": "2026-03-03T03:10:12.606103",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_001",
+        "holder_group_name": "pH",
+        "job_numbers": [
+          "260107W"
+        ],
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260303040343_HG_001",
+    "task_name": "20260303040343_pH",
+    "holder_group_code": "HG_001",
+    "holder_group_name": "pH",
+    "job_numbers": [
+      "260107W"
+    ],
+    "current_state": "analysis_targets",
+    "status": "進行中",
+    "created_at": "2026-03-03T04:03:43.286101",
+    "updated_at": "2026-03-03T04:03:43.286101",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_001",
+        "holder_group_name": "pH",
+        "job_numbers": [
+          "260107W"
+        ],
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260303043221_HG_002",
+    "task_name": "20260303043221_SS",
+    "holder_group_code": "HG_002",
+    "holder_group_name": "SS",
+    "job_numbers": [
+      "260107W"
+    ],
+    "current_state": "analysis_targets",
+    "status": "進行中",
+    "created_at": "2026-03-03T04:32:21.254114",
+    "updated_at": "2026-03-03T04:32:21.254114",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_002",
+        "holder_group_name": "SS",
+        "job_numbers": [
+          "260107W"
+        ],
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260303044248_HG_001",
+    "task_name": "20260303044248_pH",
+    "holder_group_code": "HG_001",
+    "holder_group_name": "pH",
+    "job_numbers": [
+      "260107W"
+    ],
+    "current_state": "analysis_targets",
+    "status": "進行中",
+    "created_at": "2026-03-03T04:42:48.618410",
+    "updated_at": "2026-03-03T04:42:48.618410",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_001",
+        "holder_group_name": "pH",
+        "job_numbers": [
+          "260107W"
+        ],
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260303045839_HG_001",
+    "task_name": "20260303045839_pH",
+    "holder_group_code": "HG_001",
+    "holder_group_name": "pH",
+    "job_numbers": [
+      "260106W"
+    ],
+    "current_state": "task_setup",
+    "status": "進行中",
+    "created_at": "2026-03-03T04:58:39.558652",
+    "updated_at": "2026-03-03T04:59:45.037978",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_001",
+        "holder_group_name": "pH",
+        "job_numbers": [
+          "260106W"
+        ],
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260303051006_HG_001",
+    "task_name": "20260303051006_pH",
+    "holder_group_code": "HG_001",
+    "holder_group_name": "pH",
+    "job_numbers": [
+      "260106W"
+    ],
+    "current_state": "analysis_targets",
+    "status": "進行中",
+    "created_at": "2026-03-03T05:10:06.793314",
+    "updated_at": "2026-03-03T05:10:06.793314",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_001",
+        "holder_group_name": "pH",
+        "job_numbers": [
+          "260106W"
+        ],
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260303053304_HG_001",
+    "task_name": "20260303053304_pH",
+    "holder_group_code": "HG_001",
+    "holder_group_name": "pH",
+    "job_numbers": [
+      "260106W"
+    ],
+    "current_state": "analysis",
+    "status": "進行中",
+    "created_at": "2026-03-03T05:33:04.339989",
+    "updated_at": "2026-03-03T05:33:17.257346",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_001",
+        "holder_group_name": "pH",
+        "job_numbers": [
+          "260106W"
+        ],
+        "completed": true
+      },
+      "analysis_targets": {
+        "valid_sample_set_codes": [
+          "VSSET_0141",
+          "VSSET_0139",
+          "VSSET_0126",
+          "VSSET_0124",
+          "VSSET_0114",
+          "VSSET_0110",
+          "VSSET_0109",
+          "VSSET_0096",
+          "VSSET_0093",
+          "VSSET_0092",
+          "VSSET_0091",
+          "VSSET_0090",
+          "VSSET_0088",
+          "VSSET_0087",
+          "VSSET_0086",
+          "VSSET_0085",
+          "VSSET_0084",
+          "VSSET_0083",
+          "VSSET_0082",
+          "VSSET_0081",
+          "VSSET_0079",
+          "VSSET_0078",
+          "VSSET_0074",
+          "VSSET_0073",
+          "VSSET_0072",
+          "VSSET_0071"
+        ],
+        "deleted_codes": [],
+        "added_samples": [],
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260303054110_HG_003",
+    "task_name": "20260303054110_COD",
+    "holder_group_code": "HG_003",
+    "holder_group_name": "COD",
+    "job_numbers": [
+      "260106W",
+      "260105W"
+    ],
+    "current_state": "analysis",
+    "status": "進行中",
+    "created_at": "2026-03-03T05:41:10.335584",
+    "updated_at": "2026-03-03T05:41:19.759087",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_003",
+        "holder_group_name": "COD",
+        "job_numbers": [
+          "260106W",
+          "260105W"
+        ],
+        "completed": true
+      },
+      "analysis_targets": {
+        "valid_sample_set_codes": [
+          "VSSET_0145",
+          "VSSET_0144",
+          "VSSET_0143",
+          "VSSET_0142",
+          "VSSET_0141",
+          "VSSET_0126",
+          "VSSET_0124",
+          "VSSET_0114",
+          "VSSET_0110",
+          "VSSET_0109",
+          "VSSET_0096",
+          "VSSET_0094",
+          "VSSET_0093",
+          "VSSET_0092",
+          "VSSET_0091",
+          "VSSET_0090",
+          "VSSET_0089",
+          "VSSET_0088",
+          "VSSET_0087",
+          "VSSET_0086",
+          "VSSET_0085",
+          "VSSET_0084",
+          "VSSET_0083",
+          "VSSET_0082",
+          "VSSET_0081",
+          "VSSET_0079",
+          "VSSET_0078",
+          "VSSET_0074",
+          "VSSET_0073",
+          "VSSET_0072",
+          "VSSET_0071",
+          "VSSET_0107",
+          "VSSET_0106",
+          "VSSET_0104",
+          "VSSET_0103",
+          "VSSET_0102",
+          "VSSET_0101",
+          "VSSET_0100"
+        ],
+        "deleted_codes": [],
+        "added_samples": [],
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260303061744_HG_013",
+    "task_name": "20260303061744_VOCs",
+    "holder_group_code": "HG_013",
+    "holder_group_name": "VOCs",
+    "job_numbers": [
+      "260106WV"
+    ],
+    "current_state": "result_verification",
+    "status": "進行中",
+    "created_at": "2026-03-03T06:17:44.290373",
+    "updated_at": "2026-03-03T06:17:59.045149",
+    "created_by": "デモユーザー",
+    "assigned_to": "デモユーザー",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_013",
+        "holder_group_name": "VOCs",
+        "job_numbers": [
+          "260106WV"
+        ],
+        "completed": true
+      },
+      "analysis_targets": {
+        "valid_sample_set_codes": [
+          "VSSET_0095",
+          "VSSET_0094",
+          "VSSET_0093",
+          "VSSET_0092",
+          "VSSET_0091",
+          "VSSET_0084",
+          "VSSET_0083",
+          "VSSET_0082",
+          "VSSET_0081",
+          "VSSET_0072"
+        ],
+        "deleted_codes": [],
+        "added_samples": [],
+        "completed": true
+      },
+      "analysis": {
+        "pre_checks": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "post_checks": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "completed": true
+      },
+      "result_entry": {
+        "completed": true
+      }
+    }
+  },
+  {
+    "task_id": "20260303063323_HG_008",
+    "task_name": "20260303063323_T-NP",
+    "holder_group_code": "HG_008",
+    "holder_group_name": "T-NP",
+    "job_numbers": [
+      "260106W"
+    ],
+    "current_state": "analysis_targets",
+    "status": "進行中",
+    "created_at": "2026-03-03T06:33:23.288623",
+    "updated_at": "2026-03-03T06:33:23.288623",
+    "created_by": "山本輝",
+    "assigned_to": "山本輝",
+    "state_data": {
+      "task_setup": {
+        "holder_group_code": "HG_008",
+        "holder_group_name": "T-NP",
+        "job_numbers": [
+          "260106W"
+        ],
+        "completed": true
+      }
+    }
+  }
+]

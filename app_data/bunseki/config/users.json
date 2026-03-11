@@ -1,0 +1,57 @@
+[
+  {
+    "name": "デモユーザー",
+    "email": "demo@example.com",
+    "is_active": true,
+    "id": "user_001",
+    "password": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "is_admin": false,
+    "is_analyst": true,
+    "is_reviewer": true,
+    "is_anomaly_mail": false
+  },
+  {
+    "name": "山田 太郎",
+    "email": "yamada@example.com",
+    "is_active": true,
+    "id": "user_002",
+    "password": "",
+    "is_admin": false,
+    "is_analyst": false,
+    "is_reviewer": true,
+    "is_anomaly_mail": false
+  },
+  {
+    "name": "鈴木 花子",
+    "email": "suzuki@example.com",
+    "is_active": true,
+    "id": "user_003",
+    "password": "",
+    "is_admin": false,
+    "is_analyst": false,
+    "is_reviewer": true,
+    "is_anomaly_mail": false
+  },
+  {
+    "name": "田中 一郎",
+    "email": "tanaka@example.com",
+    "is_active": true,
+    "id": "user_004",
+    "password": "",
+    "is_admin": false,
+    "is_analyst": true,
+    "is_reviewer": false,
+    "is_anomaly_mail": false
+  },
+  {
+    "id": "12414",
+    "name": "山本輝",
+    "email": "test@test.com",
+    "password": "ceaee2868fd7bdacdd274a0e95f0c1cbe3ba226825d3ae929d3ec5739de38b8e",
+    "is_active": true,
+    "is_admin": true,
+    "is_analyst": true,
+    "is_reviewer": true,
+    "is_anomaly_mail": false
+  }
+]

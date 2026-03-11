@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-02-10T09:55:17Z",
+  "items": [
+    {
+      "holder_group_code": "HG_001",
+      "holder_group_name": "pH",
+      "valid_holder_set_codes": [
+        "VHSET_0028"
+      ],
+      "is_active": true,
+      "sort_order": 1,
+      "notes": ""
+    },
+    {
+      "holder_group_code": "HG_002",
+      "holder_group_name": "SS",
+      "valid_holder_set_codes": [
+        "VHSET_0029"
+      ],
+      "is_active": true,
+      "sort_order": 2,
+      "notes": ""
+    },
+    {
+      "holder_group_code": "HG_003",
+      "holder_group_name": "COD",
+      "valid_holder_set_codes": [
+        "VHSET_0030"
+      ],
+      "is_active": true,
+      "sort_order": 3,
+      "notes": ""
+    },
+    {
+      "holder_group_code": "HG_004",
+      "holder_group_name": "油分",
+      "valid_holder_set_codes": [
+        "VHSET_0041"
+      ],
+      "is_active": true,
+      "sort_order": 4,
+      "notes": ""
+    },
+    {
+      "holder_group_code": "HG_005",
+      "holder_group_name": "残留塩素",
+      "valid_holder_set_codes": [
+        "VHSET_0042"
+      ],
+      "is_active": true,
+      "sort_order": 5,
+      "notes": ""
+    },
+    {
+      "holder_group_code": "HG_006",
+      "holder_group_name": "NH4-N",
+      "valid_holder_set_codes": [
+        "VHSET_0031",
+        "VHSET_0032"
+      ],
+      "is_active": true,
+      "sort_order": 6,
+      "notes": ""
+    },
+    {
+      "holder_group_code": "HG_007",
+      "holder_group_name": "NO2,3-N",
+      "valid_holder_set_codes": [
+        "VHSET_0033"
+      ],
+      "is_active": true,
+      "sort_order": 7,
+      "notes": ""
+    },
+    {
+      "holder_group_code": "HG_008",
+      "holder_group_name": "T-NP",
+      "valid_holder_set_codes": [
+        "VHSET_0034",
+        "VHSET_0035",
+        "VHSET_0036"
+      ],
+      "is_active": true,
+      "sort_order": 8,
+      "notes": ""
+    },
+    {
+      "holder_group_code": "HG_009",
+      "holder_group_name": "F",
+      "valid_holder_set_codes": [
+        "VHSET_0045",
+        "VHSET_0047"
+      ],
+      "is_active": true,
+      "sort_order": 9,
+      "notes": ""
+    },
+    {
+      "holder_group_code": "HG_010",
+      "holder_group_name": "CN",
+      "valid_holder_set_codes": [
+        "VHSET_0048"
+      ],
+      "is_active": true,
+      "sort_order": 10,
+      "notes": ""
+    },
+    {
+      "holder_group_code": "HG_011",
+      "holder_group_name": "Cr6+",
+      "valid_holder_set_codes": [
+        "VHSET_0039",
+        "VHSET_0040"
+      ],
+      "is_active": true,
+      "sort_order": 11,
+      "notes": ""
+    },
+    {
+      "holder_group_code": "HG_012",
+      "holder_group_name": "T-Hg",
+      "valid_holder_set_codes": [
+        "VHSET_0037",
+        "VHSET_0038"
+      ],
+      "is_active": true,
+      "sort_order": 12,
+      "notes": ""
+    },
+    {
+      "holder_group_code": "HG_013",
+      "holder_group_name": "VOCs",
+      "valid_holder_set_codes": [
+        "VHSET_0076",
+        "VHSET_0077",
+        "VHSET_0078",
+        "VHSET_0079",
+        "VHSET_0080",
+        "VHSET_0081",
+        "VHSET_0082",
+        "VHSET_0083",
+        "VHSET_0084",
+        "VHSET_0085",
+        "VHSET_0086",
+        "VHSET_0087",
+        "VHSET_0088",
+        "VHSET_0089",
+        "VHSET_0090"
+      ],
+      "is_active": true,
+      "sort_order": 13,
+      "notes": ""
+    },
+    {
+      "holder_group_code": "HG_014",
+      "holder_group_name": "重金属(ICP)",
+      "valid_holder_set_codes": [
+        "VHSET_0053",
+        "VHSET_0054",
+        "VHSET_0055",
+        "VHSET_0056",
+        "VHSET_0057",
+        "VHSET_0058",
+        "VHSET_0059",
+        "VHSET_0060",
+        "VHSET_0061",
+        "VHSET_0062",
+        "VHSET_0063",
+        "VHSET_0064",
+        "VHSET_0065",
+        "VHSET_0066",
+        "VHSET_0067",
+        "VHSET_0068",
+        "VHSET_0069",
+        "VHSET_0070",
+        "VHSET_0071",
+        "VHSET_0072",
+        "VHSET_0073",
+        "VHSET_0074",
+        "VHSET_0075"
+      ],
+      "is_active": true,
+      "sort_order": 14,
+      "notes": ""
+    }
+  ]
+}

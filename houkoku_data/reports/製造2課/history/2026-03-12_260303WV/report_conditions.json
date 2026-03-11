@@ -1,0 +1,11 @@
+{
+  "report_id": "RPT-001",
+  "report_name": "排水分析報告",
+  "job_number": "260303WV",
+  "protocol_name": "PROT-RELEASE-02",
+  "created_at": "2026-03-12T07:36:29",
+  "created_by": "",
+  "dept_id": "DEPT-B",
+  "dept_name": "製造2課",
+  "sample_count": 2
+}
