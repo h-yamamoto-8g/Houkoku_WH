@@ -3,9 +3,9 @@
 Two configurable root paths:
   - 課内データパス (INTERNAL_PATH): Bunseki_ccc の app_data
     → SOURCE_CSV_PATH = {課内}/_common/data/lab_aid/normalized/bunseki.csv
-    → CONFIG_DIR_PATH = {課内}/config
   - 課外データパス (EXTERNAL_PATH): 報告書の出力先
     → REPORTS_PATH = {課外}/報告書
+    → CONFIG_DIR_PATH = {課外}/config
 
 Resolution chain:
   1. ~/.houkoku/settings.json -> saved path
@@ -167,10 +167,10 @@ def _derive_reports_path() -> Optional[Path]:
 
 
 def _derive_config_dir_path() -> Optional[Path]:
-    """Config directory (課内データパス/config)."""
-    if INTERNAL_PATH is None:
+    """Config directory (課外データパス/config)."""
+    if EXTERNAL_PATH is None:
         return None
-    return INTERNAL_PATH / "config"
+    return EXTERNAL_PATH / "config"
 
 
 # ---------- Module-level path variables ----------

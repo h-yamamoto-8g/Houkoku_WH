@@ -1,6 +1,6 @@
 """config.json read/write for shared application configuration.
 
-config.json lives in DATA_PATH/config/ (SharePoint-synced).
+config.json lives in EXTERNAL_PATH/config/ (SharePoint-synced).
 Stores report definitions and department permission mappings.
 """
 
@@ -51,10 +51,10 @@ class AppConfig:
 
 
 def _config_path() -> Path:
-    """Resolve config.json path (lazy, reads latest DATA_PATH)."""
+    """Resolve config.json path (lazy, reads latest EXTERNAL_PATH)."""
     config_dir = _cfg.CONFIG_DIR_PATH
     if config_dir is None:
-        raise FileNotFoundError("DATA_PATH が設定されていません。設定画面からデータフォルダを指定してください。")
+        raise FileNotFoundError("課外データパスが設定されていません。設定画面からデータフォルダを指定してください。")
     return config_dir / "config.json"
 
 
