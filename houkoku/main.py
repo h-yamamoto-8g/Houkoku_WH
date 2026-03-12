@@ -34,6 +34,10 @@ def main() -> None:
     # --- Early setup ---
     os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 
+    # Import pandas before PySide6 to avoid shibokensupport/six conflict.
+    # PySide6's import hooks interfere with dateutil's use of six.moves.
+    import pandas  # noqa: F401
+
     from PySide6.QtWidgets import QApplication, QSplashScreen, QMessageBox
     from PySide6.QtCore import Qt, QTimer
     from PySide6.QtGui import QPixmap
@@ -64,7 +68,6 @@ def main() -> None:
         )
     app.processEvents()
 
-    import pandas  # noqa: F401 — preload pandas during splash
     app.processEvents()
 
     from app.ui.styles import APP_STYLESHEET
