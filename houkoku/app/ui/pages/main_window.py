@@ -45,6 +45,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
+        self.showMaximized()
 
         self._report_svc: ReportService = services["report"]
         self._config: Optional[AppConfig] = None
