@@ -128,23 +128,28 @@ class Ui_SettingsWindow:
 
         form = QFormLayout()
 
-        # 元データCSVパス
-        self.txt_source_csv_path = QLineEdit()
-        self.txt_source_csv_path.setReadOnly(True)
-        self.btn_browse_source_csv = QPushButton("参照...")
-        source_csv_row = QHBoxLayout()
-        source_csv_row.addWidget(self.txt_source_csv_path)
-        source_csv_row.addWidget(self.btn_browse_source_csv)
-        form.addRow("元データCSV:", source_csv_row)
+        # 課内データパス
+        self.txt_internal_path = QLineEdit()
+        self.txt_internal_path.setReadOnly(True)
+        self.btn_browse_internal = QPushButton("参照...")
+        internal_row = QHBoxLayout()
+        internal_row.addWidget(self.txt_internal_path)
+        internal_row.addWidget(self.btn_browse_internal)
+        form.addRow("課内データパス:", internal_row)
 
-        # 報告データ出力先パス
-        self.txt_reports_path = QLineEdit()
-        self.txt_reports_path.setReadOnly(True)
-        self.btn_browse_reports = QPushButton("参照...")
-        reports_row = QHBoxLayout()
-        reports_row.addWidget(self.txt_reports_path)
-        reports_row.addWidget(self.btn_browse_reports)
-        form.addRow("報告データ出力先:", reports_row)
+        # 課外データパス
+        self.txt_external_path = QLineEdit()
+        self.txt_external_path.setReadOnly(True)
+        self.btn_browse_external = QPushButton("参照...")
+        external_row = QHBoxLayout()
+        external_row.addWidget(self.txt_external_path)
+        external_row.addWidget(self.btn_browse_external)
+        form.addRow("課外データパス:", external_row)
+
+        # 元データCSV (derived, read-only info)
+        self.lbl_source_csv = QLabel()
+        self.lbl_source_csv.setStyleSheet("color: gray; font-size: 11px;")
+        form.addRow("元データCSV:", self.lbl_source_csv)
 
         tab_paths_layout.addLayout(form)
         tab_paths_layout.addStretch()

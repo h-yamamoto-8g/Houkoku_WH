@@ -1,9 +1,9 @@
 """Setup dialog for selecting data paths.
 
 Shown on first launch or when required paths are not configured.
-Allows separate configuration of:
-  - 元データCSVパス (source CSV file)
-  - 報告データ出力先 (report output folder)
+Two folder paths:
+  - 課内データパス: 報告ツール自体のデータフォルダ
+  - 課外データパス: Bunseki_ccc の app_data フォルダ (元データ取得元)
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ import app.config as _cfg
 
 
 class SetupRootDialog(QDialog):
-    """Dialog for setting the source CSV and reports output paths."""
+    """Dialog for setting 課内データパス and 課外データパス."""
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -42,37 +42,43 @@ class SetupRootDialog(QDialog):
         layout.addWidget(
             QLabel(
                 "水質報告ツールのデータパスを設定してください。\n"
-                "元データCSVファイルと報告データの出力先フォルダを指定します。"
+                "課内データパスと課外データパス（元データ取得元）を指定します。"
             )
         )
 
-        # --- 元データCSVパス ---
-        layout.addWidget(QLabel("元データCSVファイル:"))
-        row_csv = QHBoxLayout()
-        self._txt_source_csv = QLineEdit()
-        self._txt_source_csv.setPlaceholderText("CSVファイルを選択...")
-        if _cfg.SOURCE_CSV_PATH is not None:
-            self._txt_source_csv.setText(str(_cfg.SOURCE_CSV_PATH))
-        row_csv.addWidget(self._txt_source_csv)
+        # --- 課内データパス ---
+        layout.addWidget(QLabel("課内データパス（報告ツールデータ）:"))
+        row_internal = QHBoxLayout()
+        self._txt_internal = QLineEdit()
+        self._txt_internal.setPlaceholderText("フォルダを選択...")
+        if _cfg.DATA_PATH is not None:
+            self._txt_internal.setText(str(_cfg.DATA_PATH))
+        row_internal.addWidget(self._txt_internal)
 
-        self._btn_browse_csv = QPushButton("参照...")
-        self._btn_browse_csv.setFixedWidth(80)
-        row_csv.addWidget(self._btn_browse_csv)
-        layout.addLayout(row_csv)
+        self._btn_browse_internal = QPushButton("参照...")
+        self._btn_browse_internal.setFixedWidth(80)
+        row_internal.addWidget(self._btn_browse_internal)
+        layout.addLayout(row_internal)
 
-        # --- 報告データ出力先 ---
-        layout.addWidget(QLabel("報告データ出力先フォルダ:"))
-        row_reports = QHBoxLayout()
-        self._txt_reports = QLineEdit()
-        self._txt_reports.setPlaceholderText("出力先フォルダを選択...")
-        if _cfg.REPORTS_PATH is not None:
-            self._txt_reports.setText(str(_cfg.REPORTS_PATH))
-        row_reports.addWidget(self._txt_reports)
+        # --- 課外データパス ---
+        layout.addWidget(QLabel("課外データパス（Bunseki app_data）:"))
+        row_external = QHBoxLayout()
+        self._txt_external = QLineEdit()
+        self._txt_external.setPlaceholderText("フォルダを選択...")
+        if _cfg.SOURCE_APP_DATA_PATH is not None:
+            self._txt_external.setText(str(_cfg.SOURCE_APP_DATA_PATH))
+        row_external.addWidget(self._txt_external)
 
-        self._btn_browse_reports = QPushButton("参照...")
-        self._btn_browse_reports.setFixedWidth(80)
-        row_reports.addWidget(self._btn_browse_reports)
-        layout.addLayout(row_reports)
+        self._btn_browse_external = QPushButton("参照...")
+        self._btn_browse_external.setFixedWidth(80)
+        row_external.addWidget(self._btn_browse_external)
+        layout.addLayout(row_external)
+
+        # --- CSV derived path info ---
+        self._lbl_csv_info = QLabel()
+        self._lbl_csv_info.setStyleSheet("color: gray; font-size: 11px;")
+        self._update_csv_info()
+        layout.addWidget(self._lbl_csv_info)
 
         # --- Buttons ---
         self._buttons = QDialogButtonBox(
@@ -81,81 +87,89 @@ class SetupRootDialog(QDialog):
         layout.addWidget(self._buttons)
 
     def _connect_signals(self) -> None:
-        self._btn_browse_csv.clicked.connect(self._on_browse_csv)
-        self._btn_browse_reports.clicked.connect(self._on_browse_reports)
+        self._btn_browse_internal.clicked.connect(self._on_browse_internal)
+        self._btn_browse_external.clicked.connect(self._on_browse_external)
+        self._txt_external.textChanged.connect(lambda _: self._update_csv_info())
         self._buttons.accepted.connect(self._on_ok)
         self._buttons.rejected.connect(self.reject)
 
-    def _on_browse_csv(self) -> None:
-        start_dir = str(Path.home())
-        if self._txt_source_csv.text():
-            p = Path(self._txt_source_csv.text())
-            if p.parent.exists():
-                start_dir = str(p.parent)
+    def _update_csv_info(self) -> None:
+        text = self._txt_external.text().strip()
+        if text:
+            csv_path = Path(text) / _cfg._SOURCE_CSV_RELATIVE
+            self._lbl_csv_info.setText(f"元データCSV: {csv_path}")
+        else:
+            self._lbl_csv_info.setText("元データCSV: (課外データパスを設定してください)")
 
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            "元データCSVファイルを選択",
-            start_dir,
-            "CSVファイル (*.csv);;すべてのファイル (*)",
-        )
-        if file_path:
-            self._txt_source_csv.setText(file_path)
-
-    def _on_browse_reports(self) -> None:
+    def _on_browse_internal(self) -> None:
         start_dir = str(Path.home())
-        if self._txt_reports.text():
-            p = Path(self._txt_reports.text())
+        if self._txt_internal.text():
+            p = Path(self._txt_internal.text())
             if p.exists():
                 start_dir = str(p)
 
         folder = QFileDialog.getExistingDirectory(
-            self, "報告データ出力先フォルダを選択", start_dir
+            self, "課内データパスを選択", start_dir
         )
         if folder:
-            self._txt_reports.setText(folder)
+            self._txt_internal.setText(folder)
+
+    def _on_browse_external(self) -> None:
+        start_dir = str(Path.home())
+        if self._txt_external.text():
+            p = Path(self._txt_external.text())
+            if p.exists():
+                start_dir = str(p)
+
+        folder = QFileDialog.getExistingDirectory(
+            self, "課外データパスを選択", start_dir
+        )
+        if folder:
+            self._txt_external.setText(folder)
 
     def _on_ok(self) -> None:
-        csv_text = self._txt_source_csv.text().strip()
-        reports_text = self._txt_reports.text().strip()
+        internal_text = self._txt_internal.text().strip()
+        external_text = self._txt_external.text().strip()
 
-        if not csv_text or not reports_text:
+        if not internal_text or not external_text:
             QMessageBox.warning(
                 self, "入力エラー", "両方のパスを入力してください。"
             )
             return
 
-        csv_path = Path(csv_text)
-        reports_path = Path(reports_text)
+        internal_path = Path(internal_text)
+        external_path = Path(external_text)
 
+        # 課内データパス: create if not exists
+        if not internal_path.exists():
+            internal_path.mkdir(parents=True, exist_ok=True)
+
+        # 課外データパス: must exist
+        if not external_path.exists():
+            QMessageBox.warning(
+                self,
+                "パスエラー",
+                f"課外データパスが見つかりません:\n{external_path}",
+            )
+            return
+
+        # Check CSV exists under 課外データパス
+        csv_path = external_path / _cfg._SOURCE_CSV_RELATIVE
         if not csv_path.exists():
             QMessageBox.warning(
                 self,
                 "パスエラー",
-                f"元データCSVファイルが見つかりません:\n{csv_path}",
+                f"元データCSVが見つかりません:\n{csv_path}\n\n"
+                "課外データパスが正しいか確認してください。",
             )
             return
 
-        if not reports_path.exists():
-            reports_path.mkdir(parents=True, exist_ok=True)
-
         # Save paths
-        _cfg.save_source_csv_setting(csv_path)
-        _cfg.save_reports_path_setting(reports_path)
-
-        # Also set DATA_PATH to reports parent if not already set
-        if _cfg.DATA_PATH is None:
-            data_path = reports_path.parent
-            _cfg.save_data_path(data_path)
-            _cfg.reload_paths(
-                new_data_path=data_path,
-                new_source_csv_path=csv_path,
-                new_reports_path=reports_path,
-            )
-        else:
-            _cfg.reload_paths(
-                new_source_csv_path=csv_path,
-                new_reports_path=reports_path,
-            )
+        _cfg.save_data_path(internal_path)
+        _cfg.save_source_app_data_path(external_path)
+        _cfg.reload_paths(
+            new_data_path=internal_path,
+            new_source_app_data_path=external_path,
+        )
 
         self.accept()
