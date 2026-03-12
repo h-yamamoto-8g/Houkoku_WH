@@ -123,18 +123,25 @@ def main() -> None:
         )
     app.processEvents()
 
-    try:
-        report_svc.load_data()
-    except (FileNotFoundError, ValueError) as e:
-        if splash:
-            splash.close()
-        _close_pyinstaller_splash()
-        QMessageBox.warning(
-            None,
-            "データ読み込み警告",
-            f"CSVデータの読み込みに問題があります:\n{e}\n\n"
-            "設定画面からデータフォルダを確認してください。",
-        )
+    data_loaded = False
+    while not data_loaded:
+        try:
+            report_svc.load_data()
+            data_loaded = True
+        except (FileNotFoundError, ValueError) as e:
+            if splash:
+                splash.close()
+                splash = None
+            _close_pyinstaller_splash()
+            QMessageBox.warning(
+                None,
+                "データ読み込みエラー",
+                f"CSVデータの読み込みに問題があります:\n{e}\n\n"
+                "正しい元データCSVファイルを選択してください。",
+            )
+            dlg = SetupRootDialog()
+            if dlg.exec() != SetupRootDialog.DialogCode.Accepted:
+                sys.exit(0)
 
     # --- Create main window ---
     services = {"report": report_svc}

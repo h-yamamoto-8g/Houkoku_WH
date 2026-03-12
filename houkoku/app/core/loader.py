@@ -108,6 +108,9 @@ def filter_by_report(df: pd.DataFrame, search_filters: dict[str, list[str]]) -> 
     if not protocol_names:
         return df
 
+    if "request_protocol_name" not in df.columns:
+        return pd.DataFrame(columns=df.columns)
+
     mask = df["request_protocol_name"].isin(protocol_names)
     return df[mask].copy()
 
@@ -121,6 +124,8 @@ def get_unique_job_numbers(df: pd.DataFrame) -> list[str]:
     Returns:
         Sorted list of unique job numbers (descending for newest first).
     """
+    if "sample_job_number" not in df.columns:
+        return []
     jobs = df["sample_job_number"].dropna().unique().tolist()
     return sorted(jobs, reverse=True)
 
@@ -135,4 +140,6 @@ def filter_by_job(df: pd.DataFrame, job_number: str) -> pd.DataFrame:
     Returns:
         Filtered DataFrame.
     """
+    if "sample_job_number" not in df.columns:
+        return pd.DataFrame(columns=df.columns)
     return df[df["sample_job_number"] == job_number].copy()

@@ -38,10 +38,12 @@ class ReportService:
         if csv_path is None:
             raise FileNotFoundError("データフォルダが設定されていません。")
 
-        self._df = loader.load_source_csv(csv_path)
-        missing = loader.validate_csv_columns(self._df)
+        df = loader.load_source_csv(csv_path)
+        missing = loader.validate_csv_columns(df)
         if missing:
+            self._df = None
             raise ValueError(f"CSVに必須列が不足しています: {', '.join(missing)}")
+        self._df = df
 
     @property
     def is_loaded(self) -> bool:
