@@ -30,7 +30,7 @@ PREVIEW_COLUMNS = [
     "sample_name",
     "valid_sample_set_code",
     "sample_job_number",
-    "request_protocol_name",
+    "request_protocol",
     "holder_name",
     "test_name",
     "test_reported_data",
