@@ -3,7 +3,7 @@
 Shown on first launch or when required paths are not configured.
 Two folder paths:
   - 課内データパス: Bunseki_ccc の app_data (bunseki.csv の取得元)
-  - 課外データパス: 報告書の出力先 ({外部パス}/報告書/{部署名}/...)
+  - 課外データパス: 報告書の出力先 ({外部パス}/報告書/水質/{部署名}/...)
 """
 
 from __future__ import annotations
@@ -111,7 +111,7 @@ class SetupRootDialog(QDialog):
     def _update_reports_info(self) -> None:
         text = self._txt_external.text().strip()
         if text:
-            reports_path = Path(text) / "報告書"
+            reports_path = Path(text) / "報告書" / "水質"
             self._lbl_reports_info.setText(f"  → 報告書出力先: {reports_path}")
         else:
             self._lbl_reports_info.setText("  → 報告書出力先: (課外データパスを設定してください)")

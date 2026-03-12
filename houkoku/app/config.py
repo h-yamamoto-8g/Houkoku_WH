@@ -4,7 +4,7 @@ Two configurable root paths:
   - 課内データパス (INTERNAL_PATH): Bunseki_ccc の app_data
     → SOURCE_CSV_PATH = {課内}/_common/data/lab_aid/normalized/bunseki.csv
   - 課外データパス (EXTERNAL_PATH): 報告書の出力先
-    → REPORTS_PATH = {課外}/報告書
+    → REPORTS_PATH = {課外}/報告書/水質
     → CONFIG_DIR_PATH = {課外}/config
 
 Resolution chain:
@@ -79,7 +79,7 @@ def save_internal_path(path: Path) -> None:
 
 
 # ---------- 課外データパス (EXTERNAL_PATH) ----------
-# 報告書出力先 ({外部パス}/報告書/{部署名}/...)
+# 報告書出力先 ({外部パス}/報告書/水質/{部署名}/...)
 
 def load_external_path() -> Optional[Path]:
     """Load saved 課外データパス from local settings.json."""
@@ -160,10 +160,10 @@ def _derive_source_csv_path() -> Optional[Path]:
 
 
 def _derive_reports_path() -> Optional[Path]:
-    """Derive REPORTS_PATH from 課外データパス/報告書."""
+    """Derive REPORTS_PATH from 課外データパス/報告書/水質."""
     if EXTERNAL_PATH is None:
         return None
-    return EXTERNAL_PATH / "報告書"
+    return EXTERNAL_PATH / "報告書" / "水質"
 
 
 def _derive_config_dir_path() -> Optional[Path]:
