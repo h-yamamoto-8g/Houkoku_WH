@@ -243,47 +243,47 @@ class SettingsPage(QDialog):
     # ---------- Tab 3: Path Settings ----------
 
     def _refresh_path_display(self) -> None:
-        if _cfg.DATA_PATH is not None:
-            self._ui.txt_internal_path.setText(str(_cfg.DATA_PATH))
+        if _cfg.INTERNAL_PATH is not None:
+            self._ui.txt_internal_path.setText(str(_cfg.INTERNAL_PATH))
         else:
             self._ui.txt_internal_path.setText("")
 
-        if _cfg.SOURCE_APP_DATA_PATH is not None:
-            self._ui.txt_external_path.setText(str(_cfg.SOURCE_APP_DATA_PATH))
+        if _cfg.EXTERNAL_PATH is not None:
+            self._ui.txt_external_path.setText(str(_cfg.EXTERNAL_PATH))
         else:
             self._ui.txt_external_path.setText("")
 
         if _cfg.SOURCE_CSV_PATH is not None:
             self._ui.lbl_source_csv.setText(str(_cfg.SOURCE_CSV_PATH))
         else:
-            self._ui.lbl_source_csv.setText("(課外データパスを設定してください)")
+            self._ui.lbl_source_csv.setText("(課内データパスを設定してください)")
 
     def _on_browse_internal(self) -> None:
         start_dir = str(Path.home())
-        if _cfg.DATA_PATH and _cfg.DATA_PATH.exists():
-            start_dir = str(_cfg.DATA_PATH)
+        if _cfg.INTERNAL_PATH and _cfg.INTERNAL_PATH.exists():
+            start_dir = str(_cfg.INTERNAL_PATH)
 
         folder = QFileDialog.getExistingDirectory(
             self, "課内データパスを選択", start_dir
         )
         if folder:
             path = Path(folder)
-            _cfg.save_data_path(path)
-            _cfg.reload_paths(new_data_path=path)
+            _cfg.save_internal_path(path)
+            _cfg.reload_paths(new_internal_path=path)
             self._refresh_path_display()
 
     def _on_browse_external(self) -> None:
         start_dir = str(Path.home())
-        if _cfg.SOURCE_APP_DATA_PATH and _cfg.SOURCE_APP_DATA_PATH.exists():
-            start_dir = str(_cfg.SOURCE_APP_DATA_PATH)
+        if _cfg.EXTERNAL_PATH and _cfg.EXTERNAL_PATH.exists():
+            start_dir = str(_cfg.EXTERNAL_PATH)
 
         folder = QFileDialog.getExistingDirectory(
             self, "課外データパスを選択", start_dir
         )
         if folder:
             path = Path(folder)
-            _cfg.save_source_app_data_path(path)
-            _cfg.reload_paths(new_source_app_data_path=path)
+            _cfg.save_external_path(path)
+            _cfg.reload_paths(new_external_path=path)
             self._refresh_path_display()
 
     # ---------- Close ----------
