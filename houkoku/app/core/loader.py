@@ -66,7 +66,7 @@ def _fix_garbled_unit_names(df: pd.DataFrame) -> None:
 
 REQUIRED_COLUMNS = [
     "sample_job_number",
-    "request_protocol",
+    "request_protocol_name",
     "valid_sample_set_code",
     "sample_code",
     "sample_name",
@@ -94,7 +94,7 @@ def validate_csv_columns(df: pd.DataFrame, required: Optional[list[str]] = None)
 def filter_by_report(df: pd.DataFrame, search_filters: dict[str, list[str]]) -> pd.DataFrame:
     """Filter DataFrame by report search filters.
 
-    Uses the ``request_protocol`` column to match protocol names
+    Uses the ``request_protocol_name`` column to match protocol names
     defined in the report's search_filters.
 
     Args:
@@ -108,10 +108,10 @@ def filter_by_report(df: pd.DataFrame, search_filters: dict[str, list[str]]) -> 
     if not protocol_names:
         return df
 
-    if "request_protocol" not in df.columns:
+    if "request_protocol_name" not in df.columns:
         return pd.DataFrame(columns=df.columns)
 
-    mask = df["request_protocol"].isin(protocol_names)
+    mask = df["request_protocol_name"].isin(protocol_names)
     return df[mask].copy()
 
 
