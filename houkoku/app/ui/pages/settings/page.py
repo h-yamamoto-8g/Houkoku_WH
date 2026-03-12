@@ -83,7 +83,8 @@ class SettingsPage(QDialog):
         self._ui.btn_save_perms.clicked.connect(self._on_save_perms)
 
         # Tab 3: Paths
-        self._ui.btn_browse_data.clicked.connect(self._on_browse_data)
+        self._ui.btn_browse_source_csv.clicked.connect(self._on_browse_source_csv)
+        self._ui.btn_browse_reports.clicked.connect(self._on_browse_reports)
 
     # ---------- Tab 1: Report Management ----------
 
@@ -242,20 +243,46 @@ class SettingsPage(QDialog):
     # ---------- Tab 3: Path Settings ----------
 
     def _refresh_path_display(self) -> None:
-        if _cfg.DATA_PATH is not None:
-            self._ui.txt_data_path.setText(str(_cfg.DATA_PATH))
+        if _cfg.SOURCE_CSV_PATH is not None:
+            self._ui.txt_source_csv_path.setText(str(_cfg.SOURCE_CSV_PATH))
         else:
-            self._ui.txt_data_path.setText("")
+            self._ui.txt_source_csv_path.setText("")
 
-    def _on_browse_data(self) -> None:
+        if _cfg.REPORTS_PATH is not None:
+            self._ui.txt_reports_path.setText(str(_cfg.REPORTS_PATH))
+        else:
+            self._ui.txt_reports_path.setText("")
+
+    def _on_browse_source_csv(self) -> None:
+        start_dir = str(Path.home())
+        if _cfg.SOURCE_CSV_PATH and _cfg.SOURCE_CSV_PATH.parent.exists():
+            start_dir = str(_cfg.SOURCE_CSV_PATH.parent)
+
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "元データCSVファイルを選択",
+            start_dir,
+            "CSVファイル (*.csv);;すべてのファイル (*)",
+        )
+        if file_path:
+            path = Path(file_path)
+            _cfg.save_source_csv_setting(path)
+            _cfg.reload_paths(new_source_csv_path=path)
+            self._ui.txt_source_csv_path.setText(str(path))
+
+    def _on_browse_reports(self) -> None:
+        start_dir = str(Path.home())
+        if _cfg.REPORTS_PATH and _cfg.REPORTS_PATH.exists():
+            start_dir = str(_cfg.REPORTS_PATH)
+
         folder = QFileDialog.getExistingDirectory(
-            self, "データフォルダを選択", str(Path.home())
+            self, "報告データ出力先フォルダを選択", start_dir
         )
         if folder:
             path = Path(folder)
-            _cfg.save_data_path(path)
-            _cfg.reload_paths(path)
-            self._ui.txt_data_path.setText(str(path))
+            _cfg.save_reports_path_setting(path)
+            _cfg.reload_paths(new_reports_path=path)
+            self._ui.txt_reports_path.setText(str(path))
 
     # ---------- Close ----------
 

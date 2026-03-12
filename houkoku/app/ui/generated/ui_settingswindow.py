@@ -127,13 +127,24 @@ class Ui_SettingsWindow:
         tab_paths_layout = QVBoxLayout(tab_paths)
 
         form = QFormLayout()
-        self.txt_data_path = QLineEdit()
-        self.txt_data_path.setReadOnly(True)
-        self.btn_browse_data = QPushButton("参照...")
-        data_row = QHBoxLayout()
-        data_row.addWidget(self.txt_data_path)
-        data_row.addWidget(self.btn_browse_data)
-        form.addRow("データフォルダ:", data_row)
+
+        # 元データCSVパス
+        self.txt_source_csv_path = QLineEdit()
+        self.txt_source_csv_path.setReadOnly(True)
+        self.btn_browse_source_csv = QPushButton("参照...")
+        source_csv_row = QHBoxLayout()
+        source_csv_row.addWidget(self.txt_source_csv_path)
+        source_csv_row.addWidget(self.btn_browse_source_csv)
+        form.addRow("元データCSV:", source_csv_row)
+
+        # 報告データ出力先パス
+        self.txt_reports_path = QLineEdit()
+        self.txt_reports_path.setReadOnly(True)
+        self.btn_browse_reports = QPushButton("参照...")
+        reports_row = QHBoxLayout()
+        reports_row.addWidget(self.txt_reports_path)
+        reports_row.addWidget(self.btn_browse_reports)
+        form.addRow("報告データ出力先:", reports_row)
 
         tab_paths_layout.addLayout(form)
         tab_paths_layout.addStretch()

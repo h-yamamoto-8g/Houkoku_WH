@@ -84,8 +84,8 @@ def main() -> None:
     # --- Apply stylesheet ---
     app.setStyleSheet(APP_STYLESHEET)
 
-    # --- Resolve DATA_PATH ---
-    if _cfg.DATA_PATH is None:
+    # --- Resolve paths: show setup dialog if source CSV or reports path is invalid ---
+    if not _cfg.paths_valid():
         if splash:
             splash.close()
         _close_pyinstaller_splash()
