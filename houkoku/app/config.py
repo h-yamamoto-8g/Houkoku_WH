@@ -1,15 +1,17 @@
 """Path management and application settings.
 
-Resolution chain for each path:
-  1. ~/.houkoku/settings.json -> individual path settings
+Two configurable root paths:
+  - 課内データパス (INTERNAL_PATH): Bunseki_ccc の app_data
+    → SOURCE_CSV_PATH = {課内}/_common/data/lab_aid/normalized/bunseki.csv
+    → CONFIG_DIR_PATH = {課内}/config
+  - 課外データパス (EXTERNAL_PATH): 報告書の出力先
+    → REPORTS_PATH = {課外}/報告書
+
+Resolution chain:
+  1. ~/.houkoku/settings.json -> saved path
   2. SharePoint default (platform-dependent)
   3. Development fallback
   4. None (forces setup dialog)
-
-Paths managed:
-  - DATA_PATH: Root data folder (config.json location)
-  - SOURCE_CSV_PATH: 元データCSVファイルパス (individually configurable)
-  - REPORTS_PATH: 報告データ出力先 (individually configurable)
 """
 
 from __future__ import annotations
@@ -23,6 +25,9 @@ from typing import Optional
 
 LOCAL_SETTINGS_DIR: Path = Path.home() / ".houkoku"
 LOCAL_SETTINGS_PATH: Path = LOCAL_SETTINGS_DIR / "settings.json"
+
+# Bunseki_ccc の正規化CSVの相対パス
+_SOURCE_CSV_RELATIVE = Path("_common") / "data" / "lab_aid" / "normalized" / "bunseki.csv"
 
 
 def _load_settings() -> dict:
@@ -60,59 +65,65 @@ def _save_path_setting(key: str, path: Path) -> None:
     _save_settings(data)
 
 
-# ---------- DATA_PATH (config root) ----------
+# ---------- 課内データパス (INTERNAL_PATH) ----------
+# Bunseki_ccc の app_data (bunseki.csv, config 等)
 
-def load_data_path() -> Optional[Path]:
-    """Load saved data path from local settings.json."""
-    return _load_path_setting("app_data_path")
-
-
-def save_data_path(path: Path) -> None:
-    """Persist data path to local settings.json."""
-    _save_path_setting("app_data_path", path)
+def load_internal_path() -> Optional[Path]:
+    """Load saved 課内データパス from local settings.json."""
+    return _load_path_setting("internal_data_path")
 
 
-# ---------- SOURCE_CSV_PATH (元データCSVパス) ----------
-
-def load_source_csv_setting() -> Optional[Path]:
-    """Load saved source CSV path from local settings.json."""
-    return _load_path_setting("source_csv_path")
+def save_internal_path(path: Path) -> None:
+    """Persist 課内データパス to local settings.json."""
+    _save_path_setting("internal_data_path", path)
 
 
-def save_source_csv_setting(path: Path) -> None:
-    """Persist source CSV path to local settings.json."""
-    _save_path_setting("source_csv_path", path)
+# ---------- 課外データパス (EXTERNAL_PATH) ----------
+# 報告書出力先 ({外部パス}/報告書/{部署名}/...)
+
+def load_external_path() -> Optional[Path]:
+    """Load saved 課外データパス from local settings.json."""
+    return _load_path_setting("external_data_path")
 
 
-# ---------- REPORTS_PATH (報告データ出力先) ----------
-
-def load_reports_path_setting() -> Optional[Path]:
-    """Load saved reports output path from local settings.json."""
-    return _load_path_setting("reports_path")
-
-
-def save_reports_path_setting(path: Path) -> None:
-    """Persist reports output path to local settings.json."""
-    _save_path_setting("reports_path", path)
-
-
-# ---------- Source app_data path (元データ取得先) ----------
-
-def load_source_app_data_path() -> Optional[Path]:
-    """Load saved source app_data path from local settings.json."""
-    return _load_path_setting("source_app_data_path")
-
-
-def save_source_app_data_path(path: Path) -> None:
-    """Persist source app_data path to local settings.json."""
-    _save_path_setting("source_app_data_path", path)
+def save_external_path(path: Path) -> None:
+    """Persist 課外データパス to local settings.json."""
+    _save_path_setting("external_data_path", path)
 
 
 # ---------- Resolution ----------
 
-def _resolve_data_path() -> Optional[Path]:
-    """Resolve DATA_PATH: settings.json -> SharePoint default -> dev fallback -> None."""
-    saved = load_data_path()
+def _resolve_internal_path() -> Optional[Path]:
+    """Resolve 課内データパス: settings.json -> SharePoint default -> dev fallback -> None."""
+    saved = load_internal_path()
+    if saved is not None:
+        return saved
+
+    if platform.system() == "Windows":
+        sp = (
+            Path.home()
+            / "トクヤマグループ"
+            / "環境分析課 - ドキュメント"
+            / "app_data"
+        )
+        if sp.exists():
+            return sp
+
+    # Development fallback: look for app_data in project root or parent
+    for ancestor in (
+        Path(__file__).resolve().parent.parent,       # houkoku/
+        Path(__file__).resolve().parent.parent.parent, # Houkoku_WH/
+    ):
+        dev_path = ancestor / "app_data"
+        if dev_path.exists():
+            return dev_path
+
+    return None
+
+
+def _resolve_external_path() -> Optional[Path]:
+    """Resolve 課外データパス: settings.json -> SharePoint default -> dev fallback -> None."""
+    saved = load_external_path()
     if saved is not None:
         return saved
 
@@ -138,77 +149,72 @@ def _resolve_data_path() -> Optional[Path]:
     return None
 
 
-def _resolve_source_csv_path() -> Optional[Path]:
-    """Resolve SOURCE_CSV_PATH: explicit setting -> DATA_PATH/source/analysis_data.csv."""
-    saved = load_source_csv_setting()
-    if saved is not None:
-        return saved
-    if DATA_PATH is not None:
-        candidate = DATA_PATH / "source" / "analysis_data.csv"
-        if candidate.exists():
-            return candidate
-    return None
-
-
-def _resolve_reports_path() -> Optional[Path]:
-    """Resolve REPORTS_PATH: explicit setting -> DATA_PATH/reports."""
-    saved = load_reports_path_setting()
-    if saved is not None:
-        return saved
-    if DATA_PATH is not None:
-        candidate = DATA_PATH / "reports"
-        if candidate.exists():
-            return candidate
-    return None
-
-
-def _config_dir_path() -> Optional[Path]:
-    """Shared config directory on SharePoint (lazy)."""
-    if DATA_PATH is None:
+def _derive_source_csv_path() -> Optional[Path]:
+    """Derive SOURCE_CSV_PATH from 課内データパス + relative path."""
+    if INTERNAL_PATH is None:
         return None
-    return DATA_PATH / "config"
+    candidate = INTERNAL_PATH / _SOURCE_CSV_RELATIVE
+    if candidate.exists():
+        return candidate
+    return None
+
+
+def _derive_reports_path() -> Optional[Path]:
+    """Derive REPORTS_PATH from 課外データパス/報告書."""
+    if EXTERNAL_PATH is None:
+        return None
+    return EXTERNAL_PATH / "報告書"
+
+
+def _derive_config_dir_path() -> Optional[Path]:
+    """Config directory (課内データパス/config)."""
+    if INTERNAL_PATH is None:
+        return None
+    return INTERNAL_PATH / "config"
 
 
 # ---------- Module-level path variables ----------
 
-DATA_PATH: Optional[Path] = _resolve_data_path()
-SOURCE_APP_DATA_PATH: Optional[Path] = load_source_app_data_path()
-SOURCE_CSV_PATH: Optional[Path] = _resolve_source_csv_path()
-REPORTS_PATH: Optional[Path] = _resolve_reports_path()
-CONFIG_DIR_PATH: Optional[Path] = _config_dir_path()
+INTERNAL_PATH: Optional[Path] = _resolve_internal_path()
+EXTERNAL_PATH: Optional[Path] = _resolve_external_path()
+SOURCE_CSV_PATH: Optional[Path] = _derive_source_csv_path()
+REPORTS_PATH: Optional[Path] = _derive_reports_path()
+CONFIG_DIR_PATH: Optional[Path] = _derive_config_dir_path()
+
+# Legacy aliases (used by config_store, report_service, etc.)
+DATA_PATH = INTERNAL_PATH
 
 
 def paths_valid() -> bool:
-    """Check if both source CSV and reports paths are configured and valid."""
+    """Check if both root paths are configured and source CSV exists."""
     return (
-        SOURCE_CSV_PATH is not None
+        INTERNAL_PATH is not None
+        and INTERNAL_PATH.exists()
+        and EXTERNAL_PATH is not None
+        and EXTERNAL_PATH.exists()
+        and SOURCE_CSV_PATH is not None
         and SOURCE_CSV_PATH.exists()
-        and REPORTS_PATH is not None
-        and REPORTS_PATH.exists()
     )
 
 
 def reload_paths(
-    new_data_path: Optional[Path] = None,
-    new_source_csv_path: Optional[Path] = None,
-    new_reports_path: Optional[Path] = None,
+    new_internal_path: Optional[Path] = None,
+    new_external_path: Optional[Path] = None,
 ) -> None:
     """Re-resolve all derived paths. Called after SetupRootDialog or settings change."""
-    global DATA_PATH, SOURCE_CSV_PATH, REPORTS_PATH, CONFIG_DIR_PATH
+    global INTERNAL_PATH, EXTERNAL_PATH, SOURCE_CSV_PATH, REPORTS_PATH, CONFIG_DIR_PATH, DATA_PATH
 
-    if new_data_path is not None:
-        DATA_PATH = new_data_path
+    if new_internal_path is not None:
+        INTERNAL_PATH = new_internal_path
     else:
-        DATA_PATH = _resolve_data_path()
+        INTERNAL_PATH = _resolve_internal_path()
 
-    if new_source_csv_path is not None:
-        SOURCE_CSV_PATH = new_source_csv_path
+    if new_external_path is not None:
+        EXTERNAL_PATH = new_external_path
     else:
-        SOURCE_CSV_PATH = _resolve_source_csv_path()
+        EXTERNAL_PATH = _resolve_external_path()
 
-    if new_reports_path is not None:
-        REPORTS_PATH = new_reports_path
-    else:
-        REPORTS_PATH = _resolve_reports_path()
-
-    CONFIG_DIR_PATH = _config_dir_path()
+    DATA_PATH = INTERNAL_PATH
+    SOURCE_CSV_PATH = _derive_source_csv_path()
+    REPORTS_PATH = _derive_reports_path()
+    CONFIG_DIR_PATH = _derive_config_dir_path()
