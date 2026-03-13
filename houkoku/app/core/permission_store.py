@@ -69,6 +69,8 @@ def compute_department_summary(
 ) -> list[DepartmentSummary]:
     """Compute per-department sample counts for the preview panel.
 
+    Lightweight version: uses set intersection instead of full DataFrame split.
+
     Args:
         df: DataFrame already filtered by report + job.
         departments: List of Department configs.
@@ -77,15 +79,20 @@ def compute_department_summary(
     Returns:
         List of DepartmentSummary, one per department.
     """
-    split = split_by_department(df, departments, report_id)
-    summaries: list[DepartmentSummary] = []
+    # Pre-compute unique sample codes once (avoid repeated DataFrame ops)
+    if df.empty or "valid_sample_set_code" not in df.columns:
+        all_codes: set[str] = set()
+    else:
+        all_codes = set(df["valid_sample_set_code"].dropna().unique())
 
+    summaries: list[DepartmentSummary] = []
     for dept in departments:
-        dept_df = split.get(dept.dept_id, pd.DataFrame())
-        if dept_df.empty:
+        allowed = dept.allowed_samples.get(report_id, [])
+        if not allowed:
             codes: list[str] = []
         else:
-            codes = sorted(dept_df["valid_sample_set_code"].unique().tolist())
+            # Set intersection instead of DataFrame filtering + copy
+            codes = sorted(all_codes & set(allowed))
 
         summaries.append(
             DepartmentSummary(

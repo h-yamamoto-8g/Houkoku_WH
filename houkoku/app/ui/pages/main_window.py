@@ -178,12 +178,47 @@ class MainWindow(QMainWindow):
         jobs = list(self._current_jobs)
 
         self._overlay.set_message("データを処理中...")
-        self._overlay.show_overlay_delayed(500)
+        self._overlay.show_overlay_delayed(300)
 
         def do_filter():
+            from app.core import permission_store
+
+            # Single filter pass — avoid double call via preview_departments_multi
             df = self._report_svc.preview_reports(report, jobs)
-            summaries = self._report_svc.preview_departments_multi(report, jobs)
-            return {"df": df, "summaries": summaries}
+
+            # Compute summaries directly from df (no re-filter)
+            config = self._report_svc._config
+            depts = config.departments if config else []
+            summaries = permission_store.compute_department_summary(
+                df, depts, report.report_id
+            )
+
+            # Pre-extract preview data as list-of-lists in the worker thread
+            cols = [c for c in PREVIEW_COLUMNS if c in df.columns]
+            display = df[cols] if cols else df
+            row_limit = min(len(display), 200)
+            col_names = list(display.columns)
+
+            # Convert to Python objects here (faster than iloc in main thread)
+            rows: list[list[str]] = []
+            if row_limit > 0:
+                subset = display.iloc[:row_limit]
+                rows = [
+                    [str(v) if v is not None else "" for v in row]
+                    for row in subset.values.tolist()
+                ]
+
+            unique_samples = int(
+                df["valid_sample_set_code"].nunique() if not df.empty else 0
+            )
+
+            return {
+                "col_names": col_names,
+                "rows": rows,
+                "total_rows": len(df),
+                "unique_samples": unique_samples,
+                "summaries": summaries,
+            }
 
         self._worker = WorkerThread(do_filter, self)
         self._worker.finished.connect(self._on_job_filter_done)
@@ -196,26 +231,28 @@ class MainWindow(QMainWindow):
         if not isinstance(result, dict):
             return
 
-        df = result["df"]
+        col_names = result["col_names"]
+        rows = result["rows"]
+        total_rows = result["total_rows"]
+        unique_samples = result["unique_samples"]
         summaries = result["summaries"]
 
-        # Update preview table
-        cols = [c for c in PREVIEW_COLUMNS if c in df.columns]
-        display = df[cols] if cols else df
+        self._ui.lbl_sample_count.setText(
+            f"対象サンプル: {unique_samples}件 ({total_rows}行)"
+        )
 
-        unique_samples = df["valid_sample_set_code"].nunique() if not df.empty else 0
-        self._ui.lbl_sample_count.setText(f"対象サンプル: {unique_samples}件 ({len(df)}行)")
+        # Batch table update with rendering disabled for speed
+        tbl = self._ui.tbl_preview
+        tbl.setUpdatesEnabled(False)
+        tbl.setRowCount(len(rows))
+        tbl.setColumnCount(len(col_names))
+        tbl.setHorizontalHeaderLabels(col_names)
 
-        self._ui.tbl_preview.setRowCount(min(len(display), 200))
-        self._ui.tbl_preview.setColumnCount(len(display.columns))
-        self._ui.tbl_preview.setHorizontalHeaderLabels(list(display.columns))
+        for row_idx, row_data in enumerate(rows):
+            for col_idx, val in enumerate(row_data):
+                tbl.setItem(row_idx, col_idx, QTableWidgetItem(val))
 
-        for row_idx in range(min(len(display), 200)):
-            for col_idx, col_name in enumerate(display.columns):
-                val = display.iloc[row_idx, col_idx]
-                self._ui.tbl_preview.setItem(
-                    row_idx, col_idx, QTableWidgetItem(str(val) if val is not None else "")
-                )
+        tbl.setUpdatesEnabled(True)
 
         # Update department list
         self._dept_summaries = summaries
