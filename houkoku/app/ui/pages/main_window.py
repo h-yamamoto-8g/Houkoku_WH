@@ -45,7 +45,6 @@ class MainWindow(QMainWindow):
         super().__init__()
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
-        self.showMaximized()
 
         self._report_svc: ReportService = services["report"]
         self._config: Optional[AppConfig] = None
@@ -57,6 +56,7 @@ class MainWindow(QMainWindow):
         self._worker: Optional[WorkerThread] = None
 
         self._connect_signals()
+        self.showMaximized()
 
     def set_config(self, config: AppConfig) -> None:
         """Set config and populate report combo."""
