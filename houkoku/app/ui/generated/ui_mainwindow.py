@@ -41,6 +41,10 @@ QMainWindow {
     background: #f5f7fa;
 }
 
+QWidget#content_container {
+    background: transparent;
+}
+
 QLabel {
     color: #333;
     font-size: 13px;
@@ -161,8 +165,8 @@ class Ui_MainWindow:
 
         # Max-width content container
         content = QWidget()
+        content.setObjectName("content_container")
         content.setMaximumWidth(_MAX_CONTENT_WIDTH)
-        content.setStyleSheet("background: transparent;")
         outer_layout.addStretch(1)
         outer_layout.addWidget(content, 8)
         outer_layout.addStretch(1)
