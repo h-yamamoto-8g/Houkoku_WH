@@ -24,6 +24,9 @@ class ReportService:
     def __init__(self) -> None:
         self._df: Optional[pd.DataFrame] = None
         self._config: Optional[AppConfig] = None
+        # Cache: filter_by_report result per report_id
+        self._report_cache_id: Optional[str] = None
+        self._report_cache_df: Optional[pd.DataFrame] = None
 
     # ---------- Data Loading ----------
 
@@ -44,6 +47,7 @@ class ReportService:
             self._df = None
             raise ValueError(f"CSVに必須列が不足しています: {', '.join(missing)}")
         self._df = df
+        self._invalidate_cache()
 
     @property
     def is_loaded(self) -> bool:
@@ -51,6 +55,22 @@ class ReportService:
 
     def set_config(self, config: AppConfig) -> None:
         self._config = config
+        self._invalidate_cache()
+
+    def _invalidate_cache(self) -> None:
+        self._report_cache_id = None
+        self._report_cache_df = None
+
+    def _get_report_filtered(self, report: ReportDefinition) -> pd.DataFrame:
+        """Return report-filtered DataFrame, using cache if same report."""
+        if self._df is None:
+            return pd.DataFrame()
+        if self._report_cache_id == report.report_id and self._report_cache_df is not None:
+            return self._report_cache_df
+        filtered = loader.filter_by_report(self._df, report.search_filters)
+        self._report_cache_id = report.report_id
+        self._report_cache_df = filtered
+        return filtered
 
     # ---------- Query ----------
 
@@ -75,18 +95,14 @@ class ReportService:
         Returns:
             Sorted list of job numbers (newest first).
         """
-        if self._df is None:
-            return []
-        filtered = loader.filter_by_report(self._df, report.search_filters)
+        filtered = self._get_report_filtered(report)
         return loader.get_unique_job_numbers(filtered)
 
     def preview_reports(
         self, report: ReportDefinition, job_numbers: list[str]
     ) -> pd.DataFrame:
         """Get filtered data for multiple job numbers."""
-        if self._df is None:
-            return pd.DataFrame()
-        filtered = loader.filter_by_report(self._df, report.search_filters)
+        filtered = self._get_report_filtered(report)
         return loader.filter_by_jobs(filtered, job_numbers)
 
     def preview_departments_multi(
@@ -112,9 +128,7 @@ class ReportService:
         Returns:
             Filtered DataFrame.
         """
-        if self._df is None:
-            return pd.DataFrame()
-        filtered = loader.filter_by_report(self._df, report.search_filters)
+        filtered = self._get_report_filtered(report)
         return loader.filter_by_job(filtered, job_number)
 
     def preview_departments(

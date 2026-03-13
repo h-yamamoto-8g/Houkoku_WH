@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
     QCheckBox,
     QMainWindow,
@@ -83,6 +83,12 @@ class MainWindow(QMainWindow):
         self._overlay = LoadingOverlay(self)
         self._worker: Optional[WorkerThread] = None
 
+        # Debounce timer for JOB tag toggles (batch rapid clicks)
+        self._job_debounce = QTimer(self)
+        self._job_debounce.setSingleShot(True)
+        self._job_debounce.setInterval(150)
+        self._job_debounce.timeout.connect(self._apply_job_selection)
+
         self._connect_signals()
         self.showMaximized()
 
@@ -140,12 +146,16 @@ class MainWindow(QMainWindow):
         self._clear_preview()
 
     def _on_job_tag_toggled(self) -> None:
-        # Update styles
+        # Update styles immediately (lightweight)
         for tag in self._ui.job_tags:
             tag.setStyleSheet(
                 _TAG_STYLE_ACTIVE if tag.isChecked() else _TAG_STYLE_INACTIVE
             )
+        # Debounce the heavy data processing
+        self._job_debounce.start()
 
+    def _apply_job_selection(self) -> None:
+        """Execute data filtering after debounce delay."""
         if self._current_report is None:
             return
 
