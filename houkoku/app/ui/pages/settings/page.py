@@ -14,10 +14,15 @@ from typing import Optional
 from PySide6.QtWidgets import (
     QCheckBox,
     QDialog,
+    QDialogButtonBox,
     QFileDialog,
     QInputDialog,
+    QLabel,
     QMessageBox,
+    QScrollArea,
     QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
 )
 
 import app.config as _cfg
@@ -86,6 +91,71 @@ class SettingsPage(QDialog):
         self._ui.btn_browse_internal.clicked.connect(self._on_browse_internal)
         self._ui.btn_browse_external.clicked.connect(self._on_browse_external)
 
+    # ---------- Helpers ----------
+
+    def _get_available_protocols(self) -> list[str]:
+        """Get unique request_protocol values from loaded CSV."""
+        if not self._report_svc.is_loaded or self._report_svc._df is None:
+            return []
+        col = "request_protocol"
+        if col not in self._report_svc._df.columns:
+            return []
+        return sorted(self._report_svc._df[col].dropna().unique().tolist())
+
+    def _select_protocols_dialog(
+        self, title: str, current: list[str]
+    ) -> tuple[list[str], bool]:
+        """Show a dialog with checkboxes for available protocols.
+
+        Returns (selected_list, accepted).
+        """
+        available = self._get_available_protocols()
+        if not available:
+            # Fallback to text input if CSV not loaded
+            text, ok = QInputDialog.getText(
+                self, title, "検索条件（プロトコル名、カンマ区切り）:",
+                text=", ".join(current),
+            )
+            if not ok:
+                return [], False
+            return [p.strip() for p in text.split(",") if p.strip()], True
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle(title)
+        dlg.setMinimumWidth(350)
+        dlg.setMinimumHeight(400)
+        layout = QVBoxLayout(dlg)
+        layout.addWidget(QLabel("プロトコルを選択してください:"))
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        container = QWidget()
+        cb_layout = QVBoxLayout(container)
+
+        checkboxes: list[QCheckBox] = []
+        for proto in available:
+            cb = QCheckBox(proto)
+            cb.setChecked(proto in current)
+            checkboxes.append(cb)
+            cb_layout.addWidget(cb)
+        cb_layout.addStretch()
+
+        scroll.setWidget(container)
+        layout.addWidget(scroll)
+
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+        buttons.accepted.connect(dlg.accept)
+        buttons.rejected.connect(dlg.reject)
+        layout.addWidget(buttons)
+
+        if dlg.exec() != QDialog.DialogCode.Accepted:
+            return [], False
+
+        selected = [cb.text() for cb in checkboxes if cb.isChecked()]
+        return selected, True
+
     # ---------- Tab 1: Report Management ----------
 
     def _refresh_report_table(self) -> None:
@@ -107,13 +177,9 @@ class SettingsPage(QDialog):
         if not ok or not report_name:
             return
 
-        protocols_str, ok = QInputDialog.getText(
-            self, "報告書追加", "検索条件（プロトコル名、カンマ区切り）:"
-        )
+        protocols, ok = self._select_protocols_dialog("報告書追加 - 検索条件", [])
         if not ok:
             return
-
-        protocols = [p.strip() for p in protocols_str.split(",") if p.strip()]
 
         new_report = ReportDefinition(
             report_id=report_id,
@@ -138,16 +204,11 @@ class SettingsPage(QDialog):
         if not ok:
             return
 
-        protocols_str, ok = QInputDialog.getText(
-            self,
-            "報告書編集",
-            "検索条件（プロトコル名、カンマ区切り）:",
-            text=", ".join(r.search_filters.get("protocol_name", [])),
-        )
+        current_protocols = r.search_filters.get("protocol_name", [])
+        protocols, ok = self._select_protocols_dialog("報告書編集 - 検索条件", current_protocols)
         if not ok:
             return
 
-        protocols = [p.strip() for p in protocols_str.split(",") if p.strip()]
         r.report_name = report_name
         r.search_filters = {"protocol_name": protocols}
         self._refresh_report_table()
