@@ -136,9 +136,9 @@ class MainWindow(QMainWindow):
         self._clear_job_tags()
         for j in jobs:
             tag = QPushButton(str(j))
-            tag.setCheckable(True)
             tag.setCursor(Qt.CursorShape.PointingHandCursor)
             tag.setProperty("job_number", str(j))
+            tag.setProperty("selected", False)
             tag.setStyleSheet(_TAG_STYLE_INACTIVE)
             tag.clicked.connect(self._on_job_tag_toggled)
             self._ui.job_tags.append(tag)
@@ -146,10 +146,16 @@ class MainWindow(QMainWindow):
         self._clear_preview()
 
     def _on_job_tag_toggled(self) -> None:
+        # Manual toggle: flip the selected property of the clicked tag
+        sender = self.sender()
+        if sender is not None:
+            current = sender.property("selected")
+            sender.setProperty("selected", not current)
+
         # Update styles immediately (lightweight)
         for tag in self._ui.job_tags:
             tag.setStyleSheet(
-                _TAG_STYLE_ACTIVE if tag.isChecked() else _TAG_STYLE_INACTIVE
+                _TAG_STYLE_ACTIVE if tag.property("selected") else _TAG_STYLE_INACTIVE
             )
         # Debounce the heavy data processing
         self._job_debounce.start()
@@ -162,7 +168,7 @@ class MainWindow(QMainWindow):
         self._current_jobs = [
             tag.property("job_number")
             for tag in self._ui.job_tags
-            if tag.isChecked()
+            if tag.property("selected")
         ]
         if not self._current_jobs:
             self._clear_preview()
