@@ -11,14 +11,12 @@ from __future__ import annotations
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QAbstractItemView,
     QCheckBox,
     QComboBox,
     QGroupBox,
     QHBoxLayout,
     QHeaderView,
     QLabel,
-    QListWidget,
     QMainWindow,
     QPlainTextEdit,
     QPushButton,
@@ -69,10 +67,19 @@ class Ui_MainWindow:
         grp_report_layout.addLayout(row1)
 
         grp_report_layout.addWidget(QLabel("JOB番号（複数選択可）:"))
-        self.lst_job = QListWidget()
-        self.lst_job.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
-        self.lst_job.setMaximumHeight(120)
-        grp_report_layout.addWidget(self.lst_job)
+        self.job_scroll = QScrollArea()
+        self.job_scroll.setWidgetResizable(True)
+        self.job_scroll.setMaximumHeight(120)
+        self.job_widget = QWidget()
+        self.job_list_layout = QVBoxLayout(self.job_widget)
+        self.job_list_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.job_list_layout.setContentsMargins(8, 4, 8, 4)
+        self.job_list_layout.setSpacing(2)
+        self.job_scroll.setWidget(self.job_widget)
+        grp_report_layout.addWidget(self.job_scroll)
+
+        # Placeholder for dynamically created JOB checkboxes
+        self.job_checkboxes: list[QCheckBox] = []
 
         root_layout.addWidget(grp_report)
 

@@ -68,7 +68,6 @@ class MainWindow(QMainWindow):
 
     def _connect_signals(self) -> None:
         self._ui.cmb_report.currentIndexChanged.connect(self._on_report_changed)
-        self._ui.lst_job.itemSelectionChanged.connect(self._on_job_changed)
         self._ui.btn_export.clicked.connect(self._on_export)
         self._ui.btn_send.clicked.connect(self._on_send)
         self._ui.btn_settings.clicked.connect(self._on_settings)
@@ -88,7 +87,7 @@ class MainWindow(QMainWindow):
         self._ui.cmb_report.blockSignals(False)
 
         # JOB番号も未選択状態に
-        self._ui.lst_job.clear()
+        self._clear_job_checkboxes()
         self._clear_preview()
 
     def _on_report_changed(self, index: int) -> None:
@@ -98,27 +97,38 @@ class MainWindow(QMainWindow):
 
         self._current_report = reports[index]
 
-        # Update job numbers
+        # Update job number checkboxes
         jobs = self._report_svc.get_job_numbers(self._current_report)
-        self._ui.lst_job.blockSignals(True)
-        self._ui.lst_job.clear()
+        self._clear_job_checkboxes()
         for j in jobs:
-            self._ui.lst_job.addItem(str(j))
-        self._ui.lst_job.blockSignals(False)
+            cb = QCheckBox(str(j))
+            cb.setProperty("job_number", str(j))
+            cb.toggled.connect(self._on_job_selection_changed)
+            self._ui.job_checkboxes.append(cb)
+            self._ui.job_list_layout.addWidget(cb)
         self._clear_preview()
 
-    def _on_job_changed(self) -> None:
+    def _on_job_selection_changed(self) -> None:
         if self._current_report is None:
             return
 
-        selected_items = self._ui.lst_job.selectedItems()
-        self._current_jobs = [item.text() for item in selected_items]
+        self._current_jobs = [
+            cb.property("job_number")
+            for cb in self._ui.job_checkboxes
+            if cb.isChecked()
+        ]
         if not self._current_jobs:
             self._clear_preview()
             return
 
         self._update_preview()
         self._update_department_list()
+
+    def _clear_job_checkboxes(self) -> None:
+        for cb in self._ui.job_checkboxes:
+            self._ui.job_list_layout.removeWidget(cb)
+            cb.deleteLater()
+        self._ui.job_checkboxes.clear()
 
     # ---------- Preview ----------
 
