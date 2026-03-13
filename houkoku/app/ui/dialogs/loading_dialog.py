@@ -103,6 +103,9 @@ class LoadingOverlay(QWidget):
         self.setStyleSheet("background-color: rgba(245, 247, 250, 220);")
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, False)
 
+        # Auto-resize when parent resizes
+        parent.installEventFilter(self)
+
         # Outer layout fills the entire overlay and centres the card
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)
@@ -168,6 +171,14 @@ class LoadingOverlay(QWidget):
         self._pending = False
         self._spinner.stop()
         self.hide()
+
+    def eventFilter(self, obj, event) -> bool:
+        """Track parent resize so overlay always fills the parent."""
+        from PySide6.QtCore import QEvent
+
+        if obj is self.parent() and event.type() == QEvent.Type.Resize:
+            self.setGeometry(0, 0, event.size().width(), event.size().height())
+        return False
 
     def _do_show(self) -> None:
         """Internal: actually show the overlay."""

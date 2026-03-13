@@ -428,6 +428,3 @@ class MainWindow(QMainWindow):
 
     def resizeEvent(self, event) -> None:
         super().resizeEvent(event)
-        cw = self.centralWidget()
-        if cw:
-            self._overlay.setGeometry(cw.rect())
