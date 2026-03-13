@@ -30,11 +30,21 @@ from PySide6.QtWidgets import (
 from app.ui.widgets.flow_layout import FlowLayout
 
 # Maximum content width — beyond this, side margins absorb extra space
-_MAX_CONTENT_WIDTH = 1100
+_MAX_CONTENT_WIDTH = 1400
 
 _GLOBAL_STYLESHEET = """
+* {
+    font-family: "Yu Gothic UI", "Meiryo UI", "Segoe UI", sans-serif;
+}
+
 QMainWindow {
     background: #f5f7fa;
+}
+
+QLabel {
+    background: transparent;
+    color: #333;
+    font-size: 13px;
 }
 
 QGroupBox {
@@ -58,7 +68,8 @@ QComboBox {
     border: 1px solid #d0d0d0;
     border-radius: 4px;
     padding: 5px 10px;
-    background: #fff;
+    background: #ffffff;
+    color: #333;
     font-size: 13px;
     min-height: 22px;
 }
@@ -75,8 +86,9 @@ QTableWidget {
     border-radius: 4px;
     gridline-color: #eee;
     font-size: 12px;
-    background: #fff;
+    background: #ffffff;
     alternate-background-color: #fafbfc;
+    color: #333;
 }
 QHeaderView::section {
     background: #f5f7fa;
@@ -88,45 +100,12 @@ QHeaderView::section {
     color: #555;
 }
 
-QPushButton {
-    border: 1px solid #d0d0d0;
-    border-radius: 4px;
-    padding: 6px 16px;
-    background: #fff;
-    font-size: 13px;
-    color: #444;
-}
-QPushButton:hover {
-    background: #f0f0f0;
-    border-color: #bbb;
-}
-QPushButton:pressed { background: #e8e8e8; }
-
-QPushButton#btn_export {
-    background: #1976d2;
-    color: #fff;
-    border: none;
-    font-weight: bold;
-    border-radius: 4px;
-}
-QPushButton#btn_export:hover { background: #1565c0; }
-QPushButton#btn_export:pressed { background: #0d47a1; }
-
-QPushButton#btn_send {
-    background: #43a047;
-    color: #fff;
-    border: none;
-    font-weight: bold;
-    border-radius: 4px;
-}
-QPushButton#btn_send:hover { background: #388e3c; }
-QPushButton#btn_send:pressed { background: #2e7d32; }
-
 QPlainTextEdit {
     border: 1px solid #d0d0d0;
     border-radius: 4px;
     padding: 6px;
-    background: #fff;
+    background: #ffffff;
+    color: #333;
     font-size: 13px;
 }
 QPlainTextEdit:focus { border-color: #90caf9; }
@@ -134,13 +113,14 @@ QPlainTextEdit:focus { border-color: #90caf9; }
 QScrollArea {
     border: 1px solid #e0e0e0;
     border-radius: 4px;
-    background: #fff;
+    background: #ffffff;
 }
 
 QCheckBox {
     spacing: 6px;
     font-size: 13px;
     color: #444;
+    background: transparent;
 }
 
 QLabel#lbl_status {
@@ -190,6 +170,11 @@ class Ui_MainWindow:
         header_layout.addStretch()
         self.btn_settings = QPushButton("設定")
         self.btn_settings.setFixedWidth(80)
+        self.btn_settings.setStyleSheet(
+            "QPushButton { border: 1px solid #d0d0d0; border-radius: 4px;"
+            "  padding: 6px 16px; background: #fff; font-size: 13px; color: #444; }"
+            "QPushButton:hover { background: #f0f0f0; border-color: #bbb; }"
+        )
         header_layout.addWidget(self.btn_settings)
         root_layout.addLayout(header_layout)
 
@@ -273,11 +258,23 @@ class Ui_MainWindow:
         self.btn_export = QPushButton("CSV出力・プレビュー")
         self.btn_export.setObjectName("btn_export")
         self.btn_export.setFixedWidth(180)
+        self.btn_export.setStyleSheet(
+            "QPushButton { background: #1976d2; color: #fff; border: none;"
+            "  font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 13px; }"
+            "QPushButton:hover { background: #1565c0; }"
+            "QPushButton:pressed { background: #0d47a1; }"
+        )
         btn_layout.addWidget(self.btn_export)
 
         self.btn_send = QPushButton("送信")
         self.btn_send.setObjectName("btn_send")
         self.btn_send.setFixedWidth(120)
+        self.btn_send.setStyleSheet(
+            "QPushButton { background: #43a047; color: #fff; border: none;"
+            "  font-weight: bold; border-radius: 4px; padding: 8px 16px; font-size: 13px; }"
+            "QPushButton:hover { background: #388e3c; }"
+            "QPushButton:pressed { background: #2e7d32; }"
+        )
         btn_layout.addWidget(self.btn_send)
         root_layout.addLayout(btn_layout)
 
