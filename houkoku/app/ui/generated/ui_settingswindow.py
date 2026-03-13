@@ -87,7 +87,36 @@ class Ui_SettingsWindow:
 
         self.tabs.addTab(tab_reports, "報告書管理")
 
-        # ===== Tab 2: Department Permissions =====
+        # ===== Tab 2: Department Management =====
+        tab_depts = QWidget()
+        tab_depts_layout = QVBoxLayout(tab_depts)
+
+        tab_depts_layout.addWidget(QLabel("部署一覧:"))
+
+        self.tbl_depts = QTableWidget()
+        self.tbl_depts.setColumnCount(3)
+        self.tbl_depts.setHorizontalHeaderLabels(["部署ID", "部署名", "格納先フォルダ名"])
+        self.tbl_depts.horizontalHeader().setStretchLastSection(True)
+        self.tbl_depts.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.ResizeToContents
+        )
+        self.tbl_depts.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.tbl_depts.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        tab_depts_layout.addWidget(self.tbl_depts)
+
+        dept_btn_row = QHBoxLayout()
+        self.btn_add_dept = QPushButton("追加")
+        self.btn_edit_dept = QPushButton("編集")
+        self.btn_delete_dept = QPushButton("削除")
+        dept_btn_row.addWidget(self.btn_add_dept)
+        dept_btn_row.addWidget(self.btn_edit_dept)
+        dept_btn_row.addWidget(self.btn_delete_dept)
+        dept_btn_row.addStretch()
+        tab_depts_layout.addLayout(dept_btn_row)
+
+        self.tabs.addTab(tab_depts, "部署管理")
+
+        # ===== Tab 3: Department Permissions =====
         tab_perms = QWidget()
         tab_perms_layout = QVBoxLayout(tab_perms)
 
@@ -122,7 +151,7 @@ class Ui_SettingsWindow:
 
         self.tabs.addTab(tab_perms, "部署別権限")
 
-        # ===== Tab 3: Path Settings =====
+        # ===== Tab 4: Path Settings =====
         tab_paths = QWidget()
         tab_paths_layout = QVBoxLayout(tab_paths)
 

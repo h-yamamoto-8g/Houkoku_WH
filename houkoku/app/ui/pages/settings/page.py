@@ -70,6 +70,7 @@ class SettingsPage(QDialog):
 
     def _init_data(self) -> None:
         self._refresh_report_table()
+        self._refresh_dept_table()
         self._refresh_dept_combo()
         self._refresh_perm_report_combo()
         self._refresh_path_display()
@@ -82,7 +83,12 @@ class SettingsPage(QDialog):
         self._ui.btn_edit_report.clicked.connect(self._on_edit_report)
         self._ui.btn_delete_report.clicked.connect(self._on_delete_report)
 
-        # Tab 2: Permissions
+        # Tab 2: Department Management
+        self._ui.btn_add_dept.clicked.connect(self._on_add_dept)
+        self._ui.btn_edit_dept.clicked.connect(self._on_edit_dept)
+        self._ui.btn_delete_dept.clicked.connect(self._on_delete_dept)
+
+        # Tab 3: Permissions
         self._ui.cmb_dept.currentIndexChanged.connect(self._on_perm_selection_changed)
         self._ui.cmb_perm_report.currentIndexChanged.connect(self._on_perm_selection_changed)
         self._ui.btn_save_perms.clicked.connect(self._on_save_perms)
@@ -245,7 +251,85 @@ class SettingsPage(QDialog):
             self._refresh_report_table()
             self._refresh_perm_report_combo()
 
-    # ---------- Tab 2: Department Permissions ----------
+    # ---------- Tab 2: Department Management ----------
+
+    def _refresh_dept_table(self) -> None:
+        tbl = self._ui.tbl_depts
+        tbl.setRowCount(len(self._config.departments))
+        for i, d in enumerate(self._config.departments):
+            tbl.setItem(i, 0, QTableWidgetItem(d.dept_id))
+            tbl.setItem(i, 1, QTableWidgetItem(d.dept_name))
+            tbl.setItem(i, 2, QTableWidgetItem(d.folder_name))
+
+    def _on_add_dept(self) -> None:
+        dept_name, ok = QInputDialog.getText(self, "部署追加", "部署名:")
+        if not ok or not dept_name.strip():
+            return
+
+        folder_name, ok = QInputDialog.getText(
+            self, "部署追加", "格納先フォルダ名:\n（例: A → {報告書パス}/A に出力されます）"
+        )
+        if not ok or not folder_name.strip():
+            return
+
+        # Auto-generate dept_id
+        existing_ids = {d.dept_id for d in self._config.departments}
+        idx = len(self._config.departments) + 1
+        while f"DEPT-{idx:03d}" in existing_ids:
+            idx += 1
+        dept_id = f"DEPT-{idx:03d}"
+
+        new_dept = Department(
+            dept_id=dept_id,
+            dept_name=dept_name.strip(),
+            folder_name=folder_name.strip(),
+        )
+        self._config.departments.append(new_dept)
+        self._refresh_dept_table()
+        self._refresh_dept_combo()
+
+    def _on_edit_dept(self) -> None:
+        row = self._ui.tbl_depts.currentRow()
+        if row < 0:
+            QMessageBox.warning(self, "警告", "編集する部署を選択してください。")
+            return
+
+        dept = self._config.departments[row]
+
+        dept_name, ok = QInputDialog.getText(
+            self, "部署編集", "部署名:", text=dept.dept_name
+        )
+        if not ok:
+            return
+
+        folder_name, ok = QInputDialog.getText(
+            self, "部署編集", "格納先フォルダ名:", text=dept.folder_name
+        )
+        if not ok:
+            return
+
+        dept.dept_name = dept_name.strip()
+        dept.folder_name = folder_name.strip()
+        self._refresh_dept_table()
+        self._refresh_dept_combo()
+
+    def _on_delete_dept(self) -> None:
+        row = self._ui.tbl_depts.currentRow()
+        if row < 0:
+            QMessageBox.warning(self, "警告", "削除する部署を選択してください。")
+            return
+
+        dept = self._config.departments[row]
+        ans = QMessageBox.question(
+            self, "確認", f"部署「{dept.dept_name}」を削除しますか？\n"
+            "この部署に設定された権限も削除されます。"
+        )
+        if ans == QMessageBox.StandardButton.Yes:
+            self._config.departments.pop(row)
+            self._refresh_dept_table()
+            self._refresh_dept_combo()
+
+    # ---------- Tab 3: Department Permissions ----------
 
     def _refresh_dept_combo(self) -> None:
         self._ui.cmb_dept.blockSignals(True)
@@ -318,7 +402,7 @@ class SettingsPage(QDialog):
         dept.allowed_samples[report.report_id] = selected
         QMessageBox.information(self, "保存", "権限設定を保存しました。")
 
-    # ---------- Tab 3: Path Settings ----------
+    # ---------- Tab 4: Path Settings ----------
 
     def _refresh_path_display(self) -> None:
         if _cfg.INTERNAL_PATH is not None:
