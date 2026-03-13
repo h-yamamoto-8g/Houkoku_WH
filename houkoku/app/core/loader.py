@@ -91,11 +91,23 @@ def validate_csv_columns(df: pd.DataFrame, required: Optional[list[str]] = None)
 # ---------- Filtering ----------
 
 
-def filter_by_report(df: pd.DataFrame, search_filters: dict[str, list[str]]) -> pd.DataFrame:
-    """Filter DataFrame by report search filters.
+def _apply_base_filters(df: pd.DataFrame) -> pd.DataFrame:
+    """Apply base quality filters: sample_status=U, test_report_value_flag=YES."""
+    mask = pd.Series(True, index=df.index)
+    if "sample_status" in df.columns:
+        mask = mask & (df["sample_status"] == "U")
+    if "test_report_value_flag" in df.columns:
+        mask = mask & (df["test_report_value_flag"] == "YES")
+    return df[mask]
 
-    Uses the ``request_protocol`` column to match protocol names
-    defined in the report's search_filters.
+
+def filter_by_report(df: pd.DataFrame, search_filters: dict[str, list[str]]) -> pd.DataFrame:
+    """Filter DataFrame by report search filters and base quality filters.
+
+    Applies:
+    - sample_status == "U"
+    - test_report_value_flag == "YES"
+    - request_protocol matching search_filters
 
     Args:
         df: Source DataFrame.
@@ -104,22 +116,25 @@ def filter_by_report(df: pd.DataFrame, search_filters: dict[str, list[str]]) -> 
     Returns:
         Filtered DataFrame.
     """
+    filtered = _apply_base_filters(df)
+
     protocol_names = search_filters.get("protocol_name", [])
     if not protocol_names:
-        return df
+        return filtered.copy()
 
-    if "request_protocol" not in df.columns:
+    if "request_protocol" not in filtered.columns:
         return pd.DataFrame(columns=df.columns)
 
-    mask = df["request_protocol"].isin(protocol_names)
-    return df[mask].copy()
+    mask = filtered["request_protocol"].isin(protocol_names)
+    return filtered[mask].copy()
 
 
-def get_unique_job_numbers(df: pd.DataFrame) -> list[str]:
+def get_unique_job_numbers(df: pd.DataFrame, limit: int = 12) -> list[str]:
     """Extract unique job numbers from a (pre-filtered) DataFrame.
 
     Args:
         df: DataFrame (typically already filtered by report).
+        limit: Maximum number of job numbers to return (newest first).
 
     Returns:
         Sorted list of unique job numbers (descending for newest first).
@@ -127,7 +142,7 @@ def get_unique_job_numbers(df: pd.DataFrame) -> list[str]:
     if "sample_job_number" not in df.columns:
         return []
     jobs = df["sample_job_number"].dropna().unique().tolist()
-    return sorted(jobs, reverse=True)
+    return sorted(jobs, reverse=True)[:limit]
 
 
 def filter_by_job(df: pd.DataFrame, job_number: str) -> pd.DataFrame:
