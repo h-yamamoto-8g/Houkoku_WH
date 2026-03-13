@@ -180,6 +180,7 @@ class ReportService:
                 "protocol_name": ", ".join(
                     report.search_filters.get("protocol_name", [])
                 ),
+                "labaid_favorite_name": report.labaid_favorite_name,
                 "created_at": timestamp,
                 "created_by": created_by,
                 "dept_id": dept.dept_id,

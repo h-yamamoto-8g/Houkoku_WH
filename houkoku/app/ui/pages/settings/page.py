@@ -160,6 +160,8 @@ class SettingsPage(QDialog):
 
     def _refresh_report_table(self) -> None:
         tbl = self._ui.tbl_reports
+        tbl.setColumnCount(4)
+        tbl.setHorizontalHeaderLabels(["報告書ID", "報告書名", "検索条件", "Lab-Aidお気に入り名"])
         tbl.setRowCount(len(self._config.report_definitions))
 
         for i, r in enumerate(self._config.report_definitions):
@@ -167,6 +169,7 @@ class SettingsPage(QDialog):
             tbl.setItem(i, 1, QTableWidgetItem(r.report_name))
             protocols = ", ".join(r.search_filters.get("protocol_name", []))
             tbl.setItem(i, 2, QTableWidgetItem(protocols))
+            tbl.setItem(i, 3, QTableWidgetItem(r.labaid_favorite_name))
 
     def _on_add_report(self) -> None:
         report_id, ok = QInputDialog.getText(self, "報告書追加", "報告書ID:")
@@ -181,10 +184,17 @@ class SettingsPage(QDialog):
         if not ok:
             return
 
+        favorite_name, ok = QInputDialog.getText(
+            self, "報告書追加", "Lab-Aidお気に入り名:"
+        )
+        if not ok:
+            return
+
         new_report = ReportDefinition(
             report_id=report_id,
             report_name=report_name,
             search_filters={"protocol_name": protocols},
+            labaid_favorite_name=favorite_name.strip(),
         )
         self._config.report_definitions.append(new_report)
         self._refresh_report_table()
@@ -209,8 +219,15 @@ class SettingsPage(QDialog):
         if not ok:
             return
 
+        favorite_name, ok = QInputDialog.getText(
+            self, "報告書編集", "Lab-Aidお気に入り名:", text=r.labaid_favorite_name
+        )
+        if not ok:
+            return
+
         r.report_name = report_name
         r.search_filters = {"protocol_name": protocols}
+        r.labaid_favorite_name = favorite_name.strip()
         self._refresh_report_table()
 
     def _on_delete_report(self) -> None:

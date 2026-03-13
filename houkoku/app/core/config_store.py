@@ -25,6 +25,7 @@ class ReportDefinition:
     report_name: str = ""
     search_filters: dict[str, list[str]] = field(default_factory=dict)
     description: str = ""
+    labaid_favorite_name: str = ""
 
 
 @dataclass
@@ -64,6 +65,7 @@ def _report_def_from_dict(d: dict) -> ReportDefinition:
         report_name=d.get("report_name", ""),
         search_filters=d.get("search_filters", {}),
         description=d.get("description", ""),
+        labaid_favorite_name=d.get("labaid_favorite_name", ""),
     )
 
 
