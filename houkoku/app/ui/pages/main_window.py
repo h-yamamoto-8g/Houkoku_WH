@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QCheckBox,
     QMainWindow,
     QMessageBox,
+    QPushButton,
     QTableWidgetItem,
 )
 
@@ -23,6 +24,33 @@ from app.ui.dialogs.loading_dialog import LoadingOverlay, WorkerThread
 from app.ui.dialogs.send_confirm_dialog import SendConfirmDialog
 from app.ui.generated.ui_mainwindow import Ui_MainWindow
 
+
+_TAG_STYLE_INACTIVE = (
+    "QPushButton {"
+    "  border: 1px solid #bdbdbd;"
+    "  border-radius: 12px;"
+    "  padding: 4px 14px;"
+    "  background: #ffffff;"
+    "  color: #616161;"
+    "  font-size: 13px;"
+    "}"
+    "QPushButton:hover {"
+    "  border-color: #81c784;"
+    "  background: #f1f8e9;"
+    "}"
+)
+
+_TAG_STYLE_ACTIVE = (
+    "QPushButton {"
+    "  border: 1px solid #4caf50;"
+    "  border-radius: 12px;"
+    "  padding: 4px 14px;"
+    "  background: #e8f5e9;"
+    "  color: #2e7d32;"
+    "  font-weight: bold;"
+    "  font-size: 13px;"
+    "}"
+)
 
 # Preview columns to show (subset of the 51 CSV columns)
 PREVIEW_COLUMNS = [
@@ -87,7 +115,7 @@ class MainWindow(QMainWindow):
         self._ui.cmb_report.blockSignals(False)
 
         # JOB番号も未選択状態に
-        self._clear_job_checkboxes()
+        self._clear_job_tags()
         self._clear_preview()
 
     def _on_report_changed(self, index: int) -> None:
@@ -97,25 +125,34 @@ class MainWindow(QMainWindow):
 
         self._current_report = reports[index]
 
-        # Update job number checkboxes
+        # Update job number tags
         jobs = self._report_svc.get_job_numbers(self._current_report)
-        self._clear_job_checkboxes()
+        self._clear_job_tags()
         for j in jobs:
-            cb = QCheckBox(str(j))
-            cb.setProperty("job_number", str(j))
-            cb.toggled.connect(self._on_job_selection_changed)
-            self._ui.job_checkboxes.append(cb)
-            self._ui.job_list_layout.addWidget(cb)
+            tag = QPushButton(str(j))
+            tag.setCheckable(True)
+            tag.setCursor(Qt.CursorShape.PointingHandCursor)
+            tag.setProperty("job_number", str(j))
+            tag.setStyleSheet(_TAG_STYLE_INACTIVE)
+            tag.clicked.connect(self._on_job_tag_toggled)
+            self._ui.job_tags.append(tag)
+            self._ui.job_flow_layout.addWidget(tag)
         self._clear_preview()
 
-    def _on_job_selection_changed(self) -> None:
+    def _on_job_tag_toggled(self) -> None:
+        # Update styles
+        for tag in self._ui.job_tags:
+            tag.setStyleSheet(
+                _TAG_STYLE_ACTIVE if tag.isChecked() else _TAG_STYLE_INACTIVE
+            )
+
         if self._current_report is None:
             return
 
         self._current_jobs = [
-            cb.property("job_number")
-            for cb in self._ui.job_checkboxes
-            if cb.isChecked()
+            tag.property("job_number")
+            for tag in self._ui.job_tags
+            if tag.isChecked()
         ]
         if not self._current_jobs:
             self._clear_preview()
@@ -124,11 +161,11 @@ class MainWindow(QMainWindow):
         self._update_preview()
         self._update_department_list()
 
-    def _clear_job_checkboxes(self) -> None:
-        for cb in self._ui.job_checkboxes:
-            self._ui.job_list_layout.removeWidget(cb)
-            cb.deleteLater()
-        self._ui.job_checkboxes.clear()
+    def _clear_job_tags(self) -> None:
+        for tag in self._ui.job_tags:
+            self._ui.job_flow_layout.removeWidget(tag)
+            tag.deleteLater()
+        self._ui.job_tags.clear()
 
     # ---------- Preview ----------
 

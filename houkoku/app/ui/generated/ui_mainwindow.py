@@ -27,6 +27,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from app.ui.widgets.flow_layout import FlowLayout
+
 
 class Ui_MainWindow:
     """Sets up the main window UI matching design spec 3.1."""
@@ -70,16 +72,18 @@ class Ui_MainWindow:
         self.job_scroll = QScrollArea()
         self.job_scroll.setWidgetResizable(True)
         self.job_scroll.setMaximumHeight(120)
+        self.job_scroll.setStyleSheet(
+            "QScrollArea { border: 1px solid #ddd; border-radius: 4px; background: #fff; }"
+        )
         self.job_widget = QWidget()
-        self.job_list_layout = QVBoxLayout(self.job_widget)
-        self.job_list_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.job_list_layout.setContentsMargins(8, 4, 8, 4)
-        self.job_list_layout.setSpacing(2)
+        self.job_widget.setStyleSheet("background: transparent;")
+        self.job_flow_layout = FlowLayout(self.job_widget, h_spacing=6, v_spacing=6)
+        self.job_flow_layout.setContentsMargins(8, 8, 8, 8)
         self.job_scroll.setWidget(self.job_widget)
         grp_report_layout.addWidget(self.job_scroll)
 
-        # Placeholder for dynamically created JOB checkboxes
-        self.job_checkboxes: list[QCheckBox] = []
+        # Placeholder for dynamically created JOB tag buttons
+        self.job_tags: list[QPushButton] = []
 
         root_layout.addWidget(grp_report)
 
