@@ -42,9 +42,12 @@ QMainWindow {
 }
 
 QLabel {
-    background: transparent;
     color: #333;
     font-size: 13px;
+}
+
+QGroupBox QLabel {
+    background: #ffffff;
 }
 
 QGroupBox {
