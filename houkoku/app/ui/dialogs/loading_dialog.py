@@ -172,8 +172,20 @@ class LoadingOverlay(QWidget):
     def _do_show(self) -> None:
         """Internal: actually show the overlay."""
         self._pending = False
-        if self.parent():
-            self.setGeometry(self.parent().rect())
+        p = self.parent()
+        if p:
+            # For QMainWindow, cover the centralWidget area (not the frame)
+            from PySide6.QtWidgets import QMainWindow
+
+            if isinstance(p, QMainWindow) and p.centralWidget():
+                target = p.centralWidget()
+                # Map centralWidget geometry to MainWindow coordinates
+                pos = target.mapTo(p, target.rect().topLeft())
+                self.setGeometry(
+                    pos.x(), pos.y(), target.width(), target.height()
+                )
+            else:
+                self.setGeometry(p.rect())
         self._spinner.start()
         self.show()
         self.raise_()
