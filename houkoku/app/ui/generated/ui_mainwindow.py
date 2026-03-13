@@ -30,7 +30,7 @@ from PySide6.QtWidgets import (
 from app.ui.widgets.flow_layout import FlowLayout
 
 # Maximum content width — beyond this, side margins absorb extra space
-_MAX_CONTENT_WIDTH = 1400
+_MAX_CONTENT_WIDTH = 2800
 
 _GLOBAL_STYLESHEET = """
 * {
@@ -79,6 +79,14 @@ QComboBox::drop-down {
     subcontrol-position: center right;
     width: 20px;
     border: none;
+}
+QComboBox QAbstractItemView {
+    background: #ffffff;
+    color: #333;
+    selection-background-color: #e3f2fd;
+    selection-color: #1565c0;
+    border: 1px solid #d0d0d0;
+    padding: 4px;
 }
 
 QTableWidget {
