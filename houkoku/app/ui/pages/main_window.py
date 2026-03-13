@@ -28,7 +28,7 @@ from app.ui.generated.ui_mainwindow import Ui_MainWindow
 _TAG_STYLE_INACTIVE = (
     "QPushButton {"
     "  border: 1px solid #bdbdbd;"
-    "  border-radius: 12px;"
+    "  border-radius: 6px;"
     "  padding: 4px 14px;"
     "  background: #ffffff;"
     "  color: #616161;"
@@ -43,7 +43,7 @@ _TAG_STYLE_INACTIVE = (
 _TAG_STYLE_ACTIVE = (
     "QPushButton {"
     "  border: 1px solid #4caf50;"
-    "  border-radius: 12px;"
+    "  border-radius: 6px;"
     "  padding: 4px 14px;"
     "  background: #e8f5e9;"
     "  color: #2e7d32;"

@@ -29,6 +29,127 @@ from PySide6.QtWidgets import (
 
 from app.ui.widgets.flow_layout import FlowLayout
 
+# Maximum content width — beyond this, side margins absorb extra space
+_MAX_CONTENT_WIDTH = 1100
+
+_GLOBAL_STYLESHEET = """
+QMainWindow {
+    background: #f5f7fa;
+}
+
+QGroupBox {
+    font-size: 13px;
+    font-weight: bold;
+    color: #444;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    margin-top: 14px;
+    padding: 16px 12px 10px 12px;
+    background: #ffffff;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 2px 8px;
+    color: #555;
+}
+
+QComboBox {
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    padding: 5px 10px;
+    background: #fff;
+    font-size: 13px;
+    min-height: 22px;
+}
+QComboBox:hover { border-color: #999; }
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 20px;
+    border: none;
+}
+
+QTableWidget {
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    gridline-color: #eee;
+    font-size: 12px;
+    background: #fff;
+    alternate-background-color: #fafbfc;
+}
+QHeaderView::section {
+    background: #f5f7fa;
+    border: none;
+    border-bottom: 2px solid #ddd;
+    padding: 5px 8px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #555;
+}
+
+QPushButton {
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    padding: 6px 16px;
+    background: #fff;
+    font-size: 13px;
+    color: #444;
+}
+QPushButton:hover {
+    background: #f0f0f0;
+    border-color: #bbb;
+}
+QPushButton:pressed { background: #e8e8e8; }
+
+QPushButton#btn_export {
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    font-weight: bold;
+    border-radius: 4px;
+}
+QPushButton#btn_export:hover { background: #1565c0; }
+QPushButton#btn_export:pressed { background: #0d47a1; }
+
+QPushButton#btn_send {
+    background: #43a047;
+    color: #fff;
+    border: none;
+    font-weight: bold;
+    border-radius: 4px;
+}
+QPushButton#btn_send:hover { background: #388e3c; }
+QPushButton#btn_send:pressed { background: #2e7d32; }
+
+QPlainTextEdit {
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    padding: 6px;
+    background: #fff;
+    font-size: 13px;
+}
+QPlainTextEdit:focus { border-color: #90caf9; }
+
+QScrollArea {
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background: #fff;
+}
+
+QCheckBox {
+    spacing: 6px;
+    font-size: 13px;
+    color: #444;
+}
+
+QLabel#lbl_status {
+    font-size: 12px;
+    color: #888;
+    padding: 2px 0;
+}
+"""
+
 
 class Ui_MainWindow:
     """Sets up the main window UI matching design spec 3.1."""
@@ -38,18 +159,33 @@ class Ui_MainWindow:
         main_window.setWindowTitle("水質報告ツール")
         main_window.resize(900, 750)
         main_window.setMinimumSize(700, 550)
+        main_window.setStyleSheet(_GLOBAL_STYLESHEET)
 
-        # Central widget
+        # Central widget — outer wrapper centres a max-width container
         central = QWidget()
         main_window.setCentralWidget(central)
-        root_layout = QVBoxLayout(central)
-        root_layout.setContentsMargins(20, 16, 20, 16)
-        root_layout.setSpacing(12)
+        outer_layout = QHBoxLayout(central)
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+        outer_layout.setSpacing(0)
+
+        # Max-width content container
+        content = QWidget()
+        content.setMaximumWidth(_MAX_CONTENT_WIDTH)
+        content.setStyleSheet("background: transparent;")
+        outer_layout.addStretch()
+        outer_layout.addWidget(content)
+        outer_layout.addStretch()
+
+        root_layout = QVBoxLayout(content)
+        root_layout.setContentsMargins(24, 20, 24, 20)
+        root_layout.setSpacing(14)
 
         # --- Header ---
         header_layout = QHBoxLayout()
         self.lbl_title = QLabel("水質報告ツール")
-        self.lbl_title.setStyleSheet("font-size: 18px; font-weight: bold; color: #333333;")
+        self.lbl_title.setStyleSheet(
+            "font-size: 20px; font-weight: bold; color: #333; background: transparent;"
+        )
         header_layout.addWidget(self.lbl_title)
         header_layout.addStretch()
         self.btn_settings = QPushButton("設定")
@@ -72,13 +208,10 @@ class Ui_MainWindow:
         self.job_scroll = QScrollArea()
         self.job_scroll.setWidgetResizable(True)
         self.job_scroll.setMaximumHeight(120)
-        self.job_scroll.setStyleSheet(
-            "QScrollArea { border: 1px solid #ddd; border-radius: 4px; background: #fff; }"
-        )
         self.job_widget = QWidget()
         self.job_widget.setStyleSheet("background: transparent;")
         self.job_flow_layout = FlowLayout(self.job_widget, h_spacing=6, v_spacing=6)
-        self.job_flow_layout.setContentsMargins(8, 8, 8, 8)
+        self.job_flow_layout.setContentsMargins(10, 10, 10, 10)
         self.job_scroll.setWidget(self.job_widget)
         grp_report_layout.addWidget(self.job_scroll)
 
