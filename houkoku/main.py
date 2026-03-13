@@ -73,7 +73,7 @@ def main() -> None:
     from app.ui.styles import APP_STYLESHEET
     from app.ui.pages.main_window import MainWindow
     from app.ui.dialogs.setup_root_dialog import SetupRootDialog
-    from app.ui.dialogs.loading_dialog import WorkerThread
+    from app.ui.dialogs.loading_dialog import LoadingOverlay, WorkerThread
     from app.services.report_service import ReportService
     from app.services.data_update_service import run_validation
     from app.core.config_store import load_config
@@ -94,16 +94,6 @@ def main() -> None:
         if dlg.exec() != SetupRootDialog.DialogCode.Accepted:
             sys.exit(0)
 
-    # --- Data validation (startup check) ---
-    if splash:
-        splash.showMessage(
-            "データを検証中...",
-            Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
-        )
-    app.processEvents()
-
-    result = run_validation()
-
     # --- Initialize services ---
     report_svc = ReportService()
 
@@ -115,55 +105,73 @@ def main() -> None:
 
     report_svc.set_config(config)
 
-    # --- Load CSV data ---
-    if splash:
-        splash.showMessage(
-            "CSVデータを読み込み中...",
-            Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
-        )
-    app.processEvents()
-
-    data_loaded = False
-    while not data_loaded:
-        try:
-            report_svc.load_data()
-            data_loaded = True
-        except (FileNotFoundError, ValueError) as e:
-            if splash:
-                splash.close()
-                splash = None
-            _close_pyinstaller_splash()
-            QMessageBox.warning(
-                None,
-                "データ読み込みエラー",
-                f"CSVデータの読み込みに問題があります:\n{e}\n\n"
-                "正しい元データCSVファイルを選択してください。",
-            )
-            dlg = SetupRootDialog()
-            if dlg.exec() != SetupRootDialog.DialogCode.Accepted:
-                sys.exit(0)
-
-    # --- Create main window ---
+    # --- Create main window (show immediately with loading overlay) ---
     services = {"report": report_svc}
     window = MainWindow(services)
 
-    if config:
-        window.set_config(config)
-
-    # Show validation warnings
-    if result.warnings:
-        window._ui.lbl_status.setText(
-            f"データ: {result.message} | 警告: {', '.join(result.warnings)}"
-        )
-    elif result.success:
-        window._ui.lbl_status.setText(result.message)
-
-    # --- Show main window ---
+    # Close splash screens before showing main window
     if splash:
         splash.close()
     _close_pyinstaller_splash()
 
     window.show()
+
+    # --- Load CSV data with loading overlay ---
+    overlay = LoadingOverlay(window, "データを読み込み中...")
+    overlay.show_overlay()
+    app.processEvents()
+
+    def _do_load() -> object:
+        """Run validation and load CSV in background thread."""
+        validation = run_validation()
+        report_svc.load_data()
+        return validation
+
+    def _on_load_done(result: object) -> None:
+        """Handle successful data load."""
+        overlay.hide_overlay()
+        if config:
+            window.set_config(config)
+
+        # Show validation warnings
+        if hasattr(result, "warnings") and result.warnings:
+            window._ui.lbl_status.setText(
+                f"データ: {result.message} | 警告: {', '.join(result.warnings)}"
+            )
+        elif hasattr(result, "success") and result.success:
+            window._ui.lbl_status.setText(result.message)
+        else:
+            window._ui.lbl_status.setText("データの読み込みが完了しました。")
+
+    def _on_load_error(msg: str) -> None:
+        """Handle data load failure — prompt user to reconfigure."""
+        overlay.hide_overlay()
+        QMessageBox.warning(
+            window,
+            "データ読み込みエラー",
+            f"CSVデータの読み込みに問題があります:\n{msg}\n\n"
+            "設定画面から正しい元データCSVファイルを選択してください。",
+        )
+        dlg = SetupRootDialog(window)
+        if dlg.exec() == SetupRootDialog.DialogCode.Accepted:
+            # Retry loading with new paths
+            overlay.set_message("データを読み込み中...")
+            overlay.show_overlay()
+            worker = WorkerThread(_do_load, window)
+            worker.finished.connect(_on_load_done)
+            worker.error.connect(_on_load_error)
+            # Keep reference to prevent GC
+            window._startup_worker = worker
+            worker.start()
+        else:
+            window._ui.lbl_status.setText("データが読み込まれていません。設定を確認してください。")
+
+    worker = WorkerThread(_do_load, window)
+    worker.finished.connect(_on_load_done)
+    worker.error.connect(_on_load_error)
+    # Keep reference to prevent GC
+    window._startup_worker = worker
+    worker.start()
 
     sys.exit(app.exec())
 
