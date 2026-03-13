@@ -17,7 +17,7 @@ from app.core.config_store import Department, ReportDefinition
 
 def create_notification(
     report: ReportDefinition,
-    job_number: str,
+    job_numbers: list[str],
     dept: Department,
     message: str,
     sent_by: str = "",
@@ -27,7 +27,7 @@ def create_notification(
 
     Args:
         report: Report definition.
-        job_number: JOB number.
+        job_numbers: Selected JOB numbers.
         dept: Target department.
         message: User-entered notification message.
         sent_by: Sender name.
@@ -39,7 +39,7 @@ def create_notification(
     return {
         "report_id": report.report_id,
         "report_name": report.report_name,
-        "job_number": job_number,
+        "job_numbers": job_numbers,
         "sent_at": datetime.now().isoformat(timespec="seconds"),
         "sent_by": sent_by,
         "dept_id": dept.dept_id,
@@ -84,7 +84,7 @@ def write_notification(
 
 def send_all(
     report: ReportDefinition,
-    job_number: str,
+    job_numbers: list[str],
     departments: list[Department],
     message: str,
     sent_by: str = "",
@@ -93,7 +93,7 @@ def send_all(
 
     Args:
         report: Report definition.
-        job_number: JOB number.
+        job_numbers: Selected JOB numbers.
         departments: List of departments to notify.
         message: Notification message text.
         sent_by: Sender name.
@@ -106,7 +106,7 @@ def send_all(
     for dept in departments:
         notif = create_notification(
             report=report,
-            job_number=job_number,
+            job_numbers=job_numbers,
             dept=dept,
             message=message,
             sent_by=sent_by,

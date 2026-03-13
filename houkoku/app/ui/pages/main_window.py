@@ -49,7 +49,7 @@ class MainWindow(QMainWindow):
         self._report_svc: ReportService = services["report"]
         self._config: Optional[AppConfig] = None
         self._current_report: Optional[ReportDefinition] = None
-        self._current_job: Optional[str] = None
+        self._current_jobs: list[str] = []
         self._dept_summaries: list[DepartmentSummary] = []
 
         self._overlay = LoadingOverlay(self)
@@ -68,7 +68,7 @@ class MainWindow(QMainWindow):
 
     def _connect_signals(self) -> None:
         self._ui.cmb_report.currentIndexChanged.connect(self._on_report_changed)
-        self._ui.cmb_job.currentIndexChanged.connect(self._on_job_changed)
+        self._ui.lst_job.itemSelectionChanged.connect(self._on_job_changed)
         self._ui.btn_export.clicked.connect(self._on_export)
         self._ui.btn_send.clicked.connect(self._on_send)
         self._ui.btn_settings.clicked.connect(self._on_settings)
@@ -88,11 +88,7 @@ class MainWindow(QMainWindow):
         self._ui.cmb_report.blockSignals(False)
 
         # JOB番号も未選択状態に
-        self._ui.cmb_job.blockSignals(True)
-        self._ui.cmb_job.clear()
-        self._ui.cmb_job.setPlaceholderText("JOB番号を選択してください")
-        self._ui.cmb_job.setCurrentIndex(-1)
-        self._ui.cmb_job.blockSignals(False)
+        self._ui.lst_job.clear()
         self._clear_preview()
 
     def _on_report_changed(self, index: int) -> None:
@@ -104,21 +100,21 @@ class MainWindow(QMainWindow):
 
         # Update job numbers
         jobs = self._report_svc.get_job_numbers(self._current_report)
-        self._ui.cmb_job.blockSignals(True)
-        self._ui.cmb_job.clear()
-        self._ui.cmb_job.setPlaceholderText("JOB番号を選択してください")
+        self._ui.lst_job.blockSignals(True)
+        self._ui.lst_job.clear()
         for j in jobs:
-            self._ui.cmb_job.addItem(str(j))
-        self._ui.cmb_job.setCurrentIndex(-1)
-        self._ui.cmb_job.blockSignals(False)
+            self._ui.lst_job.addItem(str(j))
+        self._ui.lst_job.blockSignals(False)
         self._clear_preview()
 
-    def _on_job_changed(self, index: int) -> None:
-        if index < 0 or self._current_report is None:
+    def _on_job_changed(self) -> None:
+        if self._current_report is None:
             return
 
-        self._current_job = self._ui.cmb_job.currentText()
-        if not self._current_job:
+        selected_items = self._ui.lst_job.selectedItems()
+        self._current_jobs = [item.text() for item in selected_items]
+        if not self._current_jobs:
+            self._clear_preview()
             return
 
         self._update_preview()
@@ -127,10 +123,10 @@ class MainWindow(QMainWindow):
     # ---------- Preview ----------
 
     def _update_preview(self) -> None:
-        if self._current_report is None or self._current_job is None:
+        if self._current_report is None or not self._current_jobs:
             return
 
-        df = self._report_svc.preview_report(self._current_report, self._current_job)
+        df = self._report_svc.preview_reports(self._current_report, self._current_jobs)
 
         # Show subset of columns that exist
         cols = [c for c in PREVIEW_COLUMNS if c in df.columns]
@@ -152,11 +148,11 @@ class MainWindow(QMainWindow):
                 )
 
     def _update_department_list(self) -> None:
-        if self._current_report is None or self._current_job is None:
+        if self._current_report is None or not self._current_jobs:
             return
 
-        self._dept_summaries = self._report_svc.preview_departments(
-            self._current_report, self._current_job
+        self._dept_summaries = self._report_svc.preview_departments_multi(
+            self._current_report, self._current_jobs
         )
 
         # Clear existing checkboxes
@@ -201,7 +197,7 @@ class MainWindow(QMainWindow):
         ]
 
     def _on_export(self) -> None:
-        if self._current_report is None or self._current_job is None:
+        if self._current_report is None or not self._current_jobs:
             QMessageBox.warning(self, "警告", "報告書とJOB番号を選択してください。")
             return
 
@@ -214,12 +210,12 @@ class MainWindow(QMainWindow):
         self._overlay.show_overlay()
 
         report = self._current_report
-        job = self._current_job
+        jobs = list(self._current_jobs)
 
         def do_export():
             return self._report_svc.export_report(
                 report=report,
-                job_number=job,
+                job_numbers=jobs,
                 selected_dept_ids=selected,
             )
 
@@ -243,7 +239,7 @@ class MainWindow(QMainWindow):
     # ---------- Send ----------
 
     def _on_send(self) -> None:
-        if self._current_report is None or self._current_job is None:
+        if self._current_report is None or not self._current_jobs:
             QMessageBox.warning(self, "警告", "報告書とJOB番号を選択してください。")
             return
 
@@ -266,7 +262,7 @@ class MainWindow(QMainWindow):
         self._overlay.show_overlay()
 
         report = self._current_report
-        job = self._current_job
+        jobs = list(self._current_jobs)
         departments = [
             d
             for d in self._report_svc.get_departments()
@@ -276,7 +272,7 @@ class MainWindow(QMainWindow):
         def do_send():
             return notification_service.send_all(
                 report=report,
-                job_number=job,
+                job_numbers=jobs,
                 departments=departments,
                 message=message,
             )

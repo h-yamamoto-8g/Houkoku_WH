@@ -80,6 +80,26 @@ class ReportService:
         filtered = loader.filter_by_report(self._df, report.search_filters)
         return loader.get_unique_job_numbers(filtered)
 
+    def preview_reports(
+        self, report: ReportDefinition, job_numbers: list[str]
+    ) -> pd.DataFrame:
+        """Get filtered data for multiple job numbers."""
+        if self._df is None:
+            return pd.DataFrame()
+        filtered = loader.filter_by_report(self._df, report.search_filters)
+        return loader.filter_by_jobs(filtered, job_numbers)
+
+    def preview_departments_multi(
+        self, report: ReportDefinition, job_numbers: list[str]
+    ) -> list[permission_store.DepartmentSummary]:
+        """Compute department distribution for multiple jobs."""
+        if self._config is None:
+            return []
+        data = self.preview_reports(report, job_numbers)
+        return permission_store.compute_department_summary(
+            data, self._config.departments, report.report_id
+        )
+
     def preview_report(
         self, report: ReportDefinition, job_number: str
     ) -> pd.DataFrame:
@@ -121,7 +141,7 @@ class ReportService:
     def export_report(
         self,
         report: ReportDefinition,
-        job_number: str,
+        job_numbers: list[str],
         selected_dept_ids: list[str],
         created_by: str = "",
     ) -> dict[str, Path]:
@@ -131,7 +151,7 @@ class ReportService:
 
         Args:
             report: Report definition.
-            job_number: Selected job number.
+            job_numbers: Selected job numbers.
             selected_dept_ids: List of dept_ids to export to.
             created_by: User name for report_conditions.
 
@@ -147,7 +167,7 @@ class ReportService:
         if self._config is None:
             raise ValueError("設定が読み込まれていません。")
 
-        data = self.preview_report(report, job_number)
+        data = self.preview_reports(report, job_numbers)
         split = permission_store.split_by_department(
             data, self._config.departments, report.report_id
         )
@@ -155,6 +175,7 @@ class ReportService:
         now = datetime.now()
         date_str = now.strftime("%Y-%m-%d")
         timestamp = now.isoformat(timespec="seconds")
+        job_label = "_".join(job_numbers)
 
         exported: dict[str, Path] = {}
 
@@ -176,7 +197,7 @@ class ReportService:
             conditions = {
                 "report_id": report.report_id,
                 "report_name": report.report_name,
-                "job_number": job_number,
+                "job_numbers": job_numbers,
                 "protocol_name": ", ".join(
                     report.search_filters.get("protocol_name", [])
                 ),
@@ -195,7 +216,7 @@ class ReportService:
             )
 
             # --- history/{date}_{job}/ ---
-            history_dir = dept_dir / "history" / f"{date_str}_{job_number}"
+            history_dir = dept_dir / "history" / f"{date_str}_{job_label}"
             history_dir.mkdir(parents=True, exist_ok=True)
             file_utils.safe_write_bytes_with_retry(
                 history_dir / "report_data.csv", csv_bytes

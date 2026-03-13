@@ -11,12 +11,14 @@ from __future__ import annotations
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QCheckBox,
     QComboBox,
     QGroupBox,
     QHBoxLayout,
     QHeaderView,
     QLabel,
+    QListWidget,
     QMainWindow,
     QPlainTextEdit,
     QPushButton,
@@ -66,12 +68,12 @@ class Ui_MainWindow:
         row1.addWidget(self.cmb_report)
         grp_report_layout.addLayout(row1)
 
-        row2 = QHBoxLayout()
-        row2.addWidget(QLabel("JOB番号:"))
-        self.cmb_job = QComboBox()
-        self.cmb_job.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        row2.addWidget(self.cmb_job)
-        grp_report_layout.addLayout(row2)
+        grp_report_layout.addWidget(QLabel("JOB番号（複数選択可）:"))
+        self.lst_job = QListWidget()
+        self.lst_job.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self.lst_job.setMaximumHeight(120)
+        self.lst_job.setPlaceholderText("JOB番号を選択してください")
+        grp_report_layout.addWidget(self.lst_job)
 
         root_layout.addWidget(grp_report)
 

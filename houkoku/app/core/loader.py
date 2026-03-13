@@ -143,3 +143,18 @@ def filter_by_job(df: pd.DataFrame, job_number: str) -> pd.DataFrame:
     if "sample_job_number" not in df.columns:
         return pd.DataFrame(columns=df.columns)
     return df[df["sample_job_number"] == job_number].copy()
+
+
+def filter_by_jobs(df: pd.DataFrame, job_numbers: list[str]) -> pd.DataFrame:
+    """Filter DataFrame by multiple job numbers.
+
+    Args:
+        df: Source DataFrame.
+        job_numbers: Values to match in sample_job_number column.
+
+    Returns:
+        Filtered DataFrame.
+    """
+    if "sample_job_number" not in df.columns or not job_numbers:
+        return pd.DataFrame(columns=df.columns)
+    return df[df["sample_job_number"].isin(job_numbers)].copy()
