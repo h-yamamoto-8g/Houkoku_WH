@@ -135,6 +135,12 @@ class LoadingOverlay(QWidget):
         outer.addWidget(card, alignment=Qt.AlignmentFlag.AlignHCenter)
         outer.addStretch(1)
 
+        # Delayed-show timer: only display overlay if operation takes > threshold
+        self._delay_timer = QTimer(self)
+        self._delay_timer.setSingleShot(True)
+        self._delay_timer.timeout.connect(self._do_show)
+        self._pending = False
+
         self.hide()
 
     def set_message(self, message: str) -> None:
@@ -142,14 +148,32 @@ class LoadingOverlay(QWidget):
         self._lbl.setText(message)
 
     def show_overlay(self) -> None:
-        """Show the overlay and start the spinner."""
+        """Show the overlay immediately and start the spinner."""
+        self._delay_timer.stop()
+        self._pending = False
+        self._do_show()
+
+    def show_overlay_delayed(self, delay_ms: int = 500) -> None:
+        """Show the overlay only if not cancelled within delay_ms.
+
+        Call hide_overlay() before the timer fires to skip showing entirely.
+        Useful for operations that may finish quickly (<500ms).
+        """
+        self._pending = True
+        self._delay_timer.start(delay_ms)
+
+    def hide_overlay(self) -> None:
+        """Hide the overlay and stop the spinner. Cancels pending delayed show."""
+        self._delay_timer.stop()
+        self._pending = False
+        self._spinner.stop()
+        self.hide()
+
+    def _do_show(self) -> None:
+        """Internal: actually show the overlay."""
+        self._pending = False
         if self.parent():
             self.setGeometry(self.parent().rect())
         self._spinner.start()
         self.show()
         self.raise_()
-
-    def hide_overlay(self) -> None:
-        """Hide the overlay and stop the spinner."""
-        self._spinner.stop()
-        self.hide()

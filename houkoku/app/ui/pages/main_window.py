@@ -161,7 +161,7 @@ class MainWindow(QMainWindow):
         self._job_debounce.start()
 
     def _apply_job_selection(self) -> None:
-        """Execute data filtering after debounce delay."""
+        """Execute data filtering after debounce delay (async with delayed overlay)."""
         if self._current_report is None:
             return
 
@@ -174,31 +174,38 @@ class MainWindow(QMainWindow):
             self._clear_preview()
             return
 
-        self._update_preview()
-        self._update_department_list()
+        report = self._current_report
+        jobs = list(self._current_jobs)
 
-    def _clear_job_tags(self) -> None:
-        for tag in self._ui.job_tags:
-            self._ui.job_flow_layout.removeWidget(tag)
-            tag.deleteLater()
-        self._ui.job_tags.clear()
+        self._overlay.set_message("データを処理中...")
+        self._overlay.show_overlay_delayed(500)
 
-    # ---------- Preview ----------
+        def do_filter():
+            df = self._report_svc.preview_reports(report, jobs)
+            summaries = self._report_svc.preview_departments_multi(report, jobs)
+            return {"df": df, "summaries": summaries}
 
-    def _update_preview(self) -> None:
-        if self._current_report is None or not self._current_jobs:
+        self._worker = WorkerThread(do_filter, self)
+        self._worker.finished.connect(self._on_job_filter_done)
+        self._worker.error.connect(self._on_worker_error)
+        self._worker.start()
+
+    def _on_job_filter_done(self, result: object) -> None:
+        """Handle async job filter completion and update UI."""
+        self._overlay.hide_overlay()
+        if not isinstance(result, dict):
             return
 
-        df = self._report_svc.preview_reports(self._current_report, self._current_jobs)
+        df = result["df"]
+        summaries = result["summaries"]
 
-        # Show subset of columns that exist
+        # Update preview table
         cols = [c for c in PREVIEW_COLUMNS if c in df.columns]
         display = df[cols] if cols else df
 
         unique_samples = df["valid_sample_set_code"].nunique() if not df.empty else 0
         self._ui.lbl_sample_count.setText(f"対象サンプル: {unique_samples}件 ({len(df)}行)")
 
-        # Populate table
         self._ui.tbl_preview.setRowCount(min(len(display), 200))
         self._ui.tbl_preview.setColumnCount(len(display.columns))
         self._ui.tbl_preview.setHorizontalHeaderLabels(list(display.columns))
@@ -210,21 +217,14 @@ class MainWindow(QMainWindow):
                     row_idx, col_idx, QTableWidgetItem(str(val) if val is not None else "")
                 )
 
-    def _update_department_list(self) -> None:
-        if self._current_report is None or not self._current_jobs:
-            return
+        # Update department list
+        self._dept_summaries = summaries
 
-        self._dept_summaries = self._report_svc.preview_departments_multi(
-            self._current_report, self._current_jobs
-        )
-
-        # Clear existing checkboxes
         for cb in self._ui.dept_checkboxes:
             self._ui.dept_list_layout.removeWidget(cb)
             cb.deleteLater()
         self._ui.dept_checkboxes.clear()
 
-        # Create new checkboxes
         for s in self._dept_summaries:
             codes_str = ", ".join(s.sample_codes[:5])
             if len(s.sample_codes) > 5:
@@ -240,6 +240,14 @@ class MainWindow(QMainWindow):
             cb.setEnabled(s.sample_count > 0)
             self._ui.dept_checkboxes.append(cb)
             self._ui.dept_list_layout.addWidget(cb)
+
+    def _clear_job_tags(self) -> None:
+        for tag in self._ui.job_tags:
+            self._ui.job_flow_layout.removeWidget(tag)
+            tag.deleteLater()
+        self._ui.job_tags.clear()
+
+    # ---------- Preview ----------
 
     def _clear_preview(self) -> None:
         self._ui.lbl_sample_count.setText("対象サンプル: -")
@@ -270,7 +278,7 @@ class MainWindow(QMainWindow):
             return
 
         self._overlay.set_message("CSV出力中...")
-        self._overlay.show_overlay()
+        self._overlay.show_overlay_delayed(500)
 
         report = self._current_report
         jobs = list(self._current_jobs)
@@ -322,7 +330,7 @@ class MainWindow(QMainWindow):
             return
 
         self._overlay.set_message("送信中...")
-        self._overlay.show_overlay()
+        self._overlay.show_overlay_delayed(500)
 
         report = self._current_report
         jobs = list(self._current_jobs)
