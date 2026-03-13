@@ -72,7 +72,6 @@ class Ui_MainWindow:
         self.lst_job = QListWidget()
         self.lst_job.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.lst_job.setMaximumHeight(120)
-        self.lst_job.setPlaceholderText("JOB番号を選択してください")
         grp_report_layout.addWidget(self.lst_job)
 
         root_layout.addWidget(grp_report)
