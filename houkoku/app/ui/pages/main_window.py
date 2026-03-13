@@ -9,6 +9,7 @@ from typing import Optional
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
+    QApplication,
     QCheckBox,
     QMainWindow,
     QMessageBox,
@@ -146,6 +147,10 @@ class MainWindow(QMainWindow):
         self._clear_preview()
 
     def _on_job_tag_toggled(self) -> None:
+        # Block clicks while a worker is running
+        if self._worker is not None and self._worker.isRunning():
+            return
+
         # Manual toggle: flip the selected property of the clicked tag
         sender = self.sender()
         if sender is not None:
@@ -178,7 +183,8 @@ class MainWindow(QMainWindow):
         jobs = list(self._current_jobs)
 
         self._overlay.set_message("データを処理中...")
-        self._overlay.show_overlay_delayed(300)
+        self._overlay.show_overlay()
+        QApplication.processEvents()
 
         def do_filter():
             from app.core import permission_store
