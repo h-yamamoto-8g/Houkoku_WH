@@ -30,7 +30,7 @@ from PySide6.QtWidgets import (
 from app.ui.widgets.flow_layout import FlowLayout
 
 # Maximum content width — beyond this, side margins absorb extra space
-_MAX_CONTENT_WIDTH = 2800
+_MAX_CONTENT_WIDTH = 1400
 
 _GLOBAL_STYLESHEET = """
 * {
@@ -163,9 +163,9 @@ class Ui_MainWindow:
         content = QWidget()
         content.setMaximumWidth(_MAX_CONTENT_WIDTH)
         content.setStyleSheet("background: transparent;")
-        outer_layout.addStretch()
-        outer_layout.addWidget(content)
-        outer_layout.addStretch()
+        outer_layout.addStretch(1)
+        outer_layout.addWidget(content, 8)
+        outer_layout.addStretch(1)
 
         root_layout = QVBoxLayout(content)
         root_layout.setContentsMargins(24, 20, 24, 20)
