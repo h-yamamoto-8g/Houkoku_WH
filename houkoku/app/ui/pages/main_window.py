@@ -78,16 +78,22 @@ class MainWindow(QMainWindow):
     def _populate_reports(self) -> None:
         self._ui.cmb_report.blockSignals(True)
         self._ui.cmb_report.clear()
+        self._ui.cmb_report.setPlaceholderText("報告書を選択してください")
 
         reports = self._report_svc.get_report_definitions()
         for r in reports:
             self._ui.cmb_report.addItem(r.report_name, r.report_id)
 
+        self._ui.cmb_report.setCurrentIndex(-1)
         self._ui.cmb_report.blockSignals(False)
 
-        if reports:
-            self._ui.cmb_report.setCurrentIndex(0)
-            self._on_report_changed(0)
+        # JOB番号も未選択状態に
+        self._ui.cmb_job.blockSignals(True)
+        self._ui.cmb_job.clear()
+        self._ui.cmb_job.setPlaceholderText("JOB番号を選択してください")
+        self._ui.cmb_job.setCurrentIndex(-1)
+        self._ui.cmb_job.blockSignals(False)
+        self._clear_preview()
 
     def _on_report_changed(self, index: int) -> None:
         reports = self._report_svc.get_report_definitions()
@@ -100,15 +106,12 @@ class MainWindow(QMainWindow):
         jobs = self._report_svc.get_job_numbers(self._current_report)
         self._ui.cmb_job.blockSignals(True)
         self._ui.cmb_job.clear()
+        self._ui.cmb_job.setPlaceholderText("JOB番号を選択してください")
         for j in jobs:
             self._ui.cmb_job.addItem(str(j))
+        self._ui.cmb_job.setCurrentIndex(-1)
         self._ui.cmb_job.blockSignals(False)
-
-        if jobs:
-            self._ui.cmb_job.setCurrentIndex(0)
-            self._on_job_changed(0)
-        else:
-            self._clear_preview()
+        self._clear_preview()
 
     def _on_job_changed(self, index: int) -> None:
         if index < 0 or self._current_report is None:
