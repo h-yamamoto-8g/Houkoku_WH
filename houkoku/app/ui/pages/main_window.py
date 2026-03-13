@@ -81,7 +81,8 @@ class MainWindow(QMainWindow):
         self._current_jobs: list[str] = []
         self._dept_summaries: list[DepartmentSummary] = []
 
-        self._overlay = LoadingOverlay(self)
+        # Overlay is parented to centralWidget so it covers the content area
+        self._overlay = LoadingOverlay(self.centralWidget())
         self._worker: Optional[WorkerThread] = None
 
         # Debounce timer for JOB tag toggles (batch rapid clicks)
@@ -429,7 +430,4 @@ class MainWindow(QMainWindow):
         super().resizeEvent(event)
         cw = self.centralWidget()
         if cw:
-            pos = cw.mapTo(self, cw.rect().topLeft())
-            self._overlay.setGeometry(pos.x(), pos.y(), cw.width(), cw.height())
-        else:
-            self._overlay.setGeometry(self.rect())
+            self._overlay.setGeometry(cw.rect())
