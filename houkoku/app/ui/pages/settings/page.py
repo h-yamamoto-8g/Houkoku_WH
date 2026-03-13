@@ -16,8 +16,11 @@ from PySide6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
     QFileDialog,
+    QFormLayout,
+    QHBoxLayout,
     QInputDialog,
     QLabel,
+    QLineEdit,
     QMessageBox,
     QScrollArea,
     QTableWidgetItem,
@@ -177,30 +180,99 @@ class SettingsPage(QDialog):
             tbl.setItem(i, 2, QTableWidgetItem(protocols))
             tbl.setItem(i, 3, QTableWidgetItem(r.labaid_favorite_name))
 
-    def _on_add_report(self) -> None:
-        report_id, ok = QInputDialog.getText(self, "報告書追加", "報告書ID:")
-        if not ok or not report_id:
-            return
+    def _show_report_dialog(
+        self,
+        title: str,
+        report_id: str = "",
+        report_name: str = "",
+        protocols: list[str] | None = None,
+        favorite_name: str = "",
+        id_editable: bool = True,
+    ) -> tuple[dict, bool]:
+        """Show a single dialog for report add/edit. Returns (values, accepted)."""
+        if protocols is None:
+            protocols = []
 
-        report_name, ok = QInputDialog.getText(self, "報告書追加", "報告書名:")
-        if not ok or not report_name:
-            return
+        dlg = QDialog(self)
+        dlg.setWindowTitle(title)
+        dlg.setMinimumWidth(450)
+        layout = QVBoxLayout(dlg)
 
-        protocols, ok = self._select_protocols_dialog("報告書追加 - 検索条件", [])
-        if not ok:
-            return
+        form = QFormLayout()
 
-        favorite_name, ok = QInputDialog.getText(
-            self, "報告書追加", "Lab-Aidお気に入り名:"
+        txt_id = QLineEdit(report_id)
+        txt_id.setReadOnly(not id_editable)
+        if not id_editable:
+            txt_id.setStyleSheet("background: #f0f0f0; color: #888;")
+        form.addRow("報告書ID:", txt_id)
+
+        txt_name = QLineEdit(report_name)
+        form.addRow("報告書名:", txt_name)
+
+        txt_favorite = QLineEdit(favorite_name)
+        form.addRow("Lab-Aidお気に入り名:", txt_favorite)
+
+        layout.addLayout(form)
+
+        # Protocol selection
+        layout.addWidget(QLabel("検索条件（プロトコル）:"))
+        available = self._get_available_protocols()
+        proto_checkboxes: list[QCheckBox] = []
+
+        if available:
+            scroll = QScrollArea()
+            scroll.setWidgetResizable(True)
+            scroll.setMaximumHeight(200)
+            container = QWidget()
+            cb_layout = QVBoxLayout(container)
+            for proto in available:
+                cb = QCheckBox(proto)
+                cb.setChecked(proto in protocols)
+                proto_checkboxes.append(cb)
+                cb_layout.addWidget(cb)
+            cb_layout.addStretch()
+            scroll.setWidget(container)
+            layout.addWidget(scroll)
+        else:
+            txt_protocols = QLineEdit(", ".join(protocols))
+            txt_protocols.setPlaceholderText("プロトコル名をカンマ区切りで入力")
+            layout.addWidget(txt_protocols)
+
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
+        buttons.accepted.connect(dlg.accept)
+        buttons.rejected.connect(dlg.reject)
+        layout.addWidget(buttons)
+
+        if dlg.exec() != QDialog.DialogCode.Accepted:
+            return {}, False
+
+        if available:
+            selected_protocols = [cb.text() for cb in proto_checkboxes if cb.isChecked()]
+        else:
+            selected_protocols = [p.strip() for p in txt_protocols.text().split(",") if p.strip()]
+
+        return {
+            "report_id": txt_id.text().strip(),
+            "report_name": txt_name.text().strip(),
+            "protocols": selected_protocols,
+            "favorite_name": txt_favorite.text().strip(),
+        }, True
+
+    def _on_add_report(self) -> None:
+        values, ok = self._show_report_dialog("報告書追加")
         if not ok:
+            return
+        if not values["report_id"] or not values["report_name"]:
+            QMessageBox.warning(self, "警告", "報告書IDと報告書名は必須です。")
             return
 
         new_report = ReportDefinition(
-            report_id=report_id,
-            report_name=report_name,
-            search_filters={"protocol_name": protocols},
-            labaid_favorite_name=favorite_name.strip(),
+            report_id=values["report_id"],
+            report_name=values["report_name"],
+            search_filters={"protocol_name": values["protocols"]},
+            labaid_favorite_name=values["favorite_name"],
         )
         self._config.report_definitions.append(new_report)
         self._refresh_report_table()
@@ -213,27 +285,20 @@ class SettingsPage(QDialog):
             return
 
         r = self._config.report_definitions[row]
-
-        report_name, ok = QInputDialog.getText(
-            self, "報告書編集", "報告書名:", text=r.report_name
+        values, ok = self._show_report_dialog(
+            "報告書編集",
+            report_id=r.report_id,
+            report_name=r.report_name,
+            protocols=r.search_filters.get("protocol_name", []),
+            favorite_name=r.labaid_favorite_name,
+            id_editable=False,
         )
         if not ok:
             return
 
-        current_protocols = r.search_filters.get("protocol_name", [])
-        protocols, ok = self._select_protocols_dialog("報告書編集 - 検索条件", current_protocols)
-        if not ok:
-            return
-
-        favorite_name, ok = QInputDialog.getText(
-            self, "報告書編集", "Lab-Aidお気に入り名:", text=r.labaid_favorite_name
-        )
-        if not ok:
-            return
-
-        r.report_name = report_name
-        r.search_filters = {"protocol_name": protocols}
-        r.labaid_favorite_name = favorite_name.strip()
+        r.report_name = values["report_name"]
+        r.search_filters = {"protocol_name": values["protocols"]}
+        r.labaid_favorite_name = values["favorite_name"]
         self._refresh_report_table()
 
     def _on_delete_report(self) -> None:
@@ -261,15 +326,54 @@ class SettingsPage(QDialog):
             tbl.setItem(i, 1, QTableWidgetItem(d.dept_name))
             tbl.setItem(i, 2, QTableWidgetItem(d.folder_name))
 
-    def _on_add_dept(self) -> None:
-        dept_name, ok = QInputDialog.getText(self, "部署追加", "部署名:")
-        if not ok or not dept_name.strip():
-            return
+    def _show_dept_dialog(
+        self,
+        title: str,
+        dept_name: str = "",
+        folder_name: str = "",
+    ) -> tuple[dict, bool]:
+        """Show a single dialog for department add/edit. Returns (values, accepted)."""
+        dlg = QDialog(self)
+        dlg.setWindowTitle(title)
+        dlg.setMinimumWidth(400)
+        layout = QVBoxLayout(dlg)
 
-        folder_name, ok = QInputDialog.getText(
-            self, "部署追加", "格納先フォルダ名:\n（例: A → {報告書パス}/A に出力されます）"
+        form = QFormLayout()
+
+        txt_name = QLineEdit(dept_name)
+        form.addRow("部署名:", txt_name)
+
+        txt_folder = QLineEdit(folder_name)
+        txt_folder.setPlaceholderText("例: A → {報告書パス}/A に出力")
+        form.addRow("格納先フォルダ名:", txt_folder)
+
+        layout.addLayout(form)
+
+        hint = QLabel("※ 格納先フォルダ名は報告書出力先のサブフォルダ名です")
+        hint.setStyleSheet("color: #888; font-size: 11px;")
+        layout.addWidget(hint)
+
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
-        if not ok or not folder_name.strip():
+        buttons.accepted.connect(dlg.accept)
+        buttons.rejected.connect(dlg.reject)
+        layout.addWidget(buttons)
+
+        if dlg.exec() != QDialog.DialogCode.Accepted:
+            return {}, False
+
+        return {
+            "dept_name": txt_name.text().strip(),
+            "folder_name": txt_folder.text().strip(),
+        }, True
+
+    def _on_add_dept(self) -> None:
+        values, ok = self._show_dept_dialog("部署追加")
+        if not ok:
+            return
+        if not values["dept_name"] or not values["folder_name"]:
+            QMessageBox.warning(self, "警告", "部署名と格納先フォルダ名は必須です。")
             return
 
         # Auto-generate dept_id
@@ -281,8 +385,8 @@ class SettingsPage(QDialog):
 
         new_dept = Department(
             dept_id=dept_id,
-            dept_name=dept_name.strip(),
-            folder_name=folder_name.strip(),
+            dept_name=values["dept_name"],
+            folder_name=values["folder_name"],
         )
         self._config.departments.append(new_dept)
         self._refresh_dept_table()
@@ -295,21 +399,16 @@ class SettingsPage(QDialog):
             return
 
         dept = self._config.departments[row]
-
-        dept_name, ok = QInputDialog.getText(
-            self, "部署編集", "部署名:", text=dept.dept_name
+        values, ok = self._show_dept_dialog(
+            "部署編集",
+            dept_name=dept.dept_name,
+            folder_name=dept.folder_name,
         )
         if not ok:
             return
 
-        folder_name, ok = QInputDialog.getText(
-            self, "部署編集", "格納先フォルダ名:", text=dept.folder_name
-        )
-        if not ok:
-            return
-
-        dept.dept_name = dept_name.strip()
-        dept.folder_name = folder_name.strip()
+        dept.dept_name = values["dept_name"]
+        dept.folder_name = values["folder_name"]
         self._refresh_dept_table()
         self._refresh_dept_combo()
 
