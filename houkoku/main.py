@@ -117,7 +117,7 @@ def main() -> None:
     window.show()
 
     # --- Load CSV data with loading overlay ---
-    overlay = LoadingOverlay(window, "データを読み込み中...")
+    overlay = LoadingOverlay(window.centralWidget(), "データを読み込み中...")
     overlay.show_overlay()
     app.processEvents()
 
