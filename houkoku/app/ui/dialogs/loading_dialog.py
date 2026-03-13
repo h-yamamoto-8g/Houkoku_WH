@@ -103,22 +103,37 @@ class LoadingOverlay(QWidget):
         self.setStyleSheet("background-color: rgba(245, 247, 250, 220);")
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, False)
 
-        layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.setSpacing(16)
+        # Outer layout fills the entire overlay and centres the card
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.addStretch(1)
+
+        # Card: rounded white box with spinner + message
+        card = QWidget(self)
+        card.setFixedSize(220, 140)
+        card.setStyleSheet(
+            "background: #ffffff; border-radius: 12px;"
+            "border: 1px solid #e0e0e0;"
+        )
+        card_layout = QVBoxLayout(card)
+        card_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        card_layout.setSpacing(14)
 
         # Spinner
-        self._spinner = _SpinnerWidget(self)
-        layout.addWidget(self._spinner, alignment=Qt.AlignmentFlag.AlignHCenter)
+        self._spinner = _SpinnerWidget(card)
+        card_layout.addWidget(self._spinner, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         # Message
         self._lbl = QLabel(message)
         self._lbl.setStyleSheet(
-            "font-size: 15px; font-weight: bold; color: #555555; "
-            "background: transparent;"
+            "font-size: 14px; font-weight: bold; color: #555555; "
+            "background: transparent; border: none;"
         )
         self._lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self._lbl)
+        card_layout.addWidget(self._lbl)
+
+        outer.addWidget(card, alignment=Qt.AlignmentFlag.AlignHCenter)
+        outer.addStretch(1)
 
         self.hide()
 
