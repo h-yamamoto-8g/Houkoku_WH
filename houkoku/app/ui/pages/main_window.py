@@ -117,32 +117,17 @@ class MainWindow(QMainWindow):
         if not self._current_job:
             return
 
-        self._overlay.set_message("データ読み込み中...")
-        self._overlay.show_overlay()
-
-        report = self._current_report
-        job = self._current_job
-
-        def do_preview():
-            return self._report_svc.preview_job(report, job)
-
-        self._worker = WorkerThread(do_preview, self)
-        self._worker.finished.connect(self._on_job_preview_done)
-        self._worker.error.connect(self._on_worker_error)
-        self._worker.start()
-
-    def _on_job_preview_done(self, result: object) -> None:
-        self._overlay.hide_overlay()
-        if not isinstance(result, tuple):
-            return
-        df, summaries = result
-        self._apply_preview(df)
-        self._apply_department_list(summaries)
+        self._update_preview()
+        self._update_department_list()
 
     # ---------- Preview ----------
 
-    def _apply_preview(self, df: "pd.DataFrame") -> None:
-        """Populate preview table from a pre-computed DataFrame."""
+    def _update_preview(self) -> None:
+        if self._current_report is None or self._current_job is None:
+            return
+
+        df = self._report_svc.preview_report(self._current_report, self._current_job)
+
         # Show subset of columns that exist
         cols = [c for c in PREVIEW_COLUMNS if c in df.columns]
         display = df[cols] if cols else df
@@ -162,9 +147,13 @@ class MainWindow(QMainWindow):
                     row_idx, col_idx, QTableWidgetItem(str(val) if val is not None else "")
                 )
 
-    def _apply_department_list(self, summaries: list["DepartmentSummary"]) -> None:
-        """Populate department checkboxes from pre-computed summaries."""
-        self._dept_summaries = summaries
+    def _update_department_list(self) -> None:
+        if self._current_report is None or self._current_job is None:
+            return
+
+        self._dept_summaries = self._report_svc.preview_departments(
+            self._current_report, self._current_job
+        )
 
         # Clear existing checkboxes
         for cb in self._ui.dept_checkboxes:
