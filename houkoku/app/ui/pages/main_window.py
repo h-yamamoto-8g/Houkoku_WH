@@ -48,6 +48,7 @@ class MainWindow(QMainWindow):
         self._config: Optional[AppConfig] = None
         self._current_report: Optional[ReportDefinition] = None
         self._current_job: Optional[str] = None
+        self._selected_jobs: list[str] = []
         self._dept_summaries: list[DepartmentSummary] = []
 
         self._overlay = LoadingOverlay(self)
@@ -110,36 +111,35 @@ class MainWindow(QMainWindow):
     def _on_jobs_loaded(self, result: object) -> None:
         self._overlay.hide_overlay()
         jobs = result if isinstance(result, list) else []
-
-        self._ui.cmb_job.blockSignals(True)
-        self._ui.cmb_job.clear()
-        for j in jobs:
-            self._ui.cmb_job.addItem(str(j))
-        self._ui.cmb_job.blockSignals(False)
-
-        if jobs:
-            self._ui.cmb_job.setCurrentIndex(0)
+        self._ui.tag_job.set_items([str(j) for j in jobs])
 
     def _on_search(self) -> None:
         if self._current_report is None:
             return
 
-        job = self._ui.cmb_job.currentText()
-        if not job:
+        selected_jobs = self._ui.tag_job.selected_items()
+        if not selected_jobs:
             QMessageBox.warning(self, "警告", "JOB番号を選択してください。")
             return
 
-        self._current_job = job
+        self._current_job = selected_jobs[0]
+        self._selected_jobs = selected_jobs
         self._update_preview()
         self._update_dept_summaries()
 
     # ---------- Preview ----------
 
     def _update_preview(self) -> None:
-        if self._current_report is None or self._current_job is None:
+        if self._current_report is None or not self._selected_jobs:
             return
 
-        df = self._report_svc.preview_report(self._current_report, self._current_job)
+        import pandas as pd
+
+        frames = [
+            self._report_svc.preview_report(self._current_report, j)
+            for j in self._selected_jobs
+        ]
+        df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
         # Show subset of columns that exist
         cols = [c for c in PREVIEW_COLUMNS if c in df.columns]
@@ -171,6 +171,7 @@ class MainWindow(QMainWindow):
         self._ui.lbl_sample_count.setText("対象サンプル: -")
         self._ui.tbl_preview.setRowCount(0)
         self._ui.tbl_preview.setColumnCount(0)
+        self._ui.tag_job.clear()
         self._dept_summaries.clear()
 
     # ---------- Export ----------

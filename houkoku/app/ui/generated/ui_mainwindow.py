@@ -24,6 +24,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from app.ui.widgets.tag_selector import TagSelector
+
 
 class Ui_MainWindow:
     """Sets up the main window UI matching design spec 3.1."""
@@ -63,15 +65,16 @@ class Ui_MainWindow:
         row1.addWidget(self.cmb_report)
         grp_report_layout.addLayout(row1)
 
-        row2 = QHBoxLayout()
-        row2.addWidget(QLabel("JOB番号:"))
-        self.cmb_job = QComboBox()
-        self.cmb_job.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        row2.addWidget(self.cmb_job)
+        job_header = QHBoxLayout()
+        job_header.addWidget(QLabel("JOB番号:"))
+        job_header.addStretch()
         self.btn_search = QPushButton("検索")
         self.btn_search.setFixedWidth(80)
-        row2.addWidget(self.btn_search)
-        grp_report_layout.addLayout(row2)
+        job_header.addWidget(self.btn_search)
+        grp_report_layout.addLayout(job_header)
+
+        self.tag_job = TagSelector()
+        grp_report_layout.addWidget(self.tag_job)
 
         root_layout.addWidget(grp_report)
 
