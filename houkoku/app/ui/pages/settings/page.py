@@ -137,6 +137,7 @@ class SettingsPage(QDialog):
         )
         self._report_svc = report_svc
         self._dirty = False
+        self._cached_df: object = None  # lazily loaded CSV DataFrame
 
         self._init_data()
         self._connect_signals()
@@ -340,18 +341,21 @@ class SettingsPage(QDialog):
         dept = self._config.departments[dept_idx]
         report = self._config.report_definitions[report_idx]
 
-        # Get all unique sample codes from loaded data
+        # Load sample codes directly from CSV (no report service dependency)
         all_samples: list[str] = []
-        if self._report_svc.is_loaded:
-            df = self._report_svc.preview_report(report, "")
-            # Get from full report filter (any job)
-            import pandas as pd
+        if _cfg.SOURCE_CSV_PATH and _cfg.SOURCE_CSV_PATH.exists():
             from app.core import loader
-            full_df = loader.filter_by_report(
-                self._report_svc._df, report.search_filters
-            ) if self._report_svc._df is not None else pd.DataFrame()
-            if not full_df.empty:
-                all_samples = sorted(full_df["valid_sample_set_code"].dropna().unique().tolist())
+
+            try:
+                if self._cached_df is None:
+                    self._cached_df = loader.load_source_csv(_cfg.SOURCE_CSV_PATH)
+                filtered = loader.filter_by_report(self._cached_df, report.search_filters)
+                if not filtered.empty and "valid_sample_set_code" in filtered.columns:
+                    all_samples = sorted(
+                        filtered["valid_sample_set_code"].dropna().unique().tolist()
+                    )
+            except Exception:
+                pass
 
         allowed = dept.allowed_samples.get(report.report_id, [])
 
