@@ -375,7 +375,7 @@ class SettingsPage(QDialog):
         for item in samples:
             set_code = item.get("set_code", "")
             display = item.get("display_name", set_code)
-            cb = QCheckBox(f"{set_code}  ({display})")
+            cb = QCheckBox(f"{display}  ({set_code})")
             cb.setProperty("sample_code", set_code)
             cb.setChecked(set_code in allowed)
             self._ui.sample_checkboxes.append(cb)
