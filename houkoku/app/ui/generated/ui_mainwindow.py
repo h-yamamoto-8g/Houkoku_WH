@@ -71,11 +71,10 @@ class Ui_MainWindow:
         self.cmb_job = QComboBox()
         self.cmb_job.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         row2.addWidget(self.cmb_job)
-        grp_report_layout.addLayout(row2)
-
         self.btn_search = QPushButton("検索")
-        self.btn_search.setFixedWidth(120)
-        grp_report_layout.addWidget(self.btn_search)
+        self.btn_search.setFixedWidth(80)
+        row2.addWidget(self.btn_search)
+        grp_report_layout.addLayout(row2)
 
         root_layout.addWidget(grp_report)
 
