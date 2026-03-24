@@ -24,6 +24,9 @@ class ReportService:
     def __init__(self) -> None:
         self._df: Optional[pd.DataFrame] = None
         self._config: Optional[AppConfig] = None
+        # Cache for report-filtered DataFrame to avoid redundant filtering
+        self._report_cache_key: Optional[str] = None
+        self._report_cache_df: Optional[pd.DataFrame] = None
 
     # ---------- Data Loading ----------
 
@@ -44,6 +47,7 @@ class ReportService:
             self._df = None
             raise ValueError(f"CSVに必須列が不足しています: {', '.join(missing)}")
         self._df = df
+        self.invalidate_report_cache()
 
     @property
     def is_loaded(self) -> bool:
@@ -66,6 +70,25 @@ class ReportService:
             return []
         return self._config.departments
 
+    def _get_report_filtered(self, report: ReportDefinition) -> pd.DataFrame:
+        """Return report-filtered DataFrame, using cache if available."""
+        if self._df is None:
+            return pd.DataFrame()
+
+        cache_key = report.report_id
+        if self._report_cache_key == cache_key and self._report_cache_df is not None:
+            return self._report_cache_df
+
+        filtered = loader.filter_by_report(self._df, report.search_filters)
+        self._report_cache_key = cache_key
+        self._report_cache_df = filtered
+        return filtered
+
+    def invalidate_report_cache(self) -> None:
+        """Clear the report filter cache (call when source data changes)."""
+        self._report_cache_key = None
+        self._report_cache_df = None
+
     def get_job_numbers(self, report: ReportDefinition) -> list[str]:
         """Get unique job numbers for a report definition.
 
@@ -75,9 +98,7 @@ class ReportService:
         Returns:
             Sorted list of job numbers (newest first).
         """
-        if self._df is None:
-            return []
-        filtered = loader.filter_by_report(self._df, report.search_filters)
+        filtered = self._get_report_filtered(report)
         return loader.get_unique_job_numbers(filtered)
 
     def preview_report(
@@ -92,10 +113,28 @@ class ReportService:
         Returns:
             Filtered DataFrame.
         """
-        if self._df is None:
-            return pd.DataFrame()
-        filtered = loader.filter_by_report(self._df, report.search_filters)
+        filtered = self._get_report_filtered(report)
         return loader.filter_by_job(filtered, job_number)
+
+    def preview_job(
+        self, report: ReportDefinition, job_number: str
+    ) -> tuple[pd.DataFrame, list[permission_store.DepartmentSummary]]:
+        """Compute preview data and department summaries in one pass.
+
+        Args:
+            report: Report definition.
+            job_number: Selected job number.
+
+        Returns:
+            Tuple of (filtered DataFrame, list of DepartmentSummary).
+        """
+        data = self.preview_report(report, job_number)
+        summaries: list[permission_store.DepartmentSummary] = []
+        if self._config is not None:
+            summaries = permission_store.compute_department_summary(
+                data, self._config.departments, report.report_id
+            )
+        return data, summaries
 
     def preview_departments(
         self, report: ReportDefinition, job_number: str
