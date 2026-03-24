@@ -55,6 +55,7 @@ class ReportService:
 
     def set_config(self, config: AppConfig) -> None:
         self._config = config
+        self.invalidate_report_cache()
 
     # ---------- Query ----------
 
