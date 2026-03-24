@@ -94,9 +94,25 @@ class MainWindow(QMainWindow):
             return
 
         self._current_report = reports[index]
+        self._clear_preview()
 
-        # Update job numbers
-        jobs = self._report_svc.get_job_numbers(self._current_report)
+        self._overlay.set_message("JOB番号を取得中...")
+        self._overlay.show_overlay()
+
+        report = self._current_report
+
+        def do_get_jobs():
+            return self._report_svc.get_job_numbers(report)
+
+        self._worker = WorkerThread(do_get_jobs, self)
+        self._worker.finished.connect(self._on_jobs_loaded)
+        self._worker.error.connect(self._on_worker_error)
+        self._worker.start()
+
+    def _on_jobs_loaded(self, result: object) -> None:
+        self._overlay.hide_overlay()
+        jobs = result if isinstance(result, list) else []
+
         self._ui.cmb_job.blockSignals(True)
         self._ui.cmb_job.clear()
         for j in jobs:
@@ -105,8 +121,6 @@ class MainWindow(QMainWindow):
 
         if jobs:
             self._ui.cmb_job.setCurrentIndex(0)
-        else:
-            self._clear_preview()
 
     def _on_search(self) -> None:
         if self._current_report is None:
