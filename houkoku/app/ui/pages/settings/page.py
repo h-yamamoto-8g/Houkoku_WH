@@ -8,16 +8,20 @@ Wraps Ui_SettingsWindow and manages the three tabs:
 
 from __future__ import annotations
 
+import uuid
 from pathlib import Path
 from typing import Optional
 
 from PySide6.QtWidgets import (
     QCheckBox,
     QDialog,
+    QDialogButtonBox,
     QFileDialog,
-    QInputDialog,
+    QFormLayout,
+    QLineEdit,
     QMessageBox,
     QTableWidgetItem,
+    QVBoxLayout,
 )
 
 import app.config as _cfg
@@ -30,6 +34,48 @@ from app.core.config_store import (
 )
 from app.services.report_service import ReportService
 from app.ui.generated.ui_settingswindow import Ui_SettingsWindow
+
+
+class _ReportDialog(QDialog):
+    """Single dialog for adding/editing a report definition."""
+
+    def __init__(
+        self,
+        parent=None,
+        *,
+        title: str = "報告書",
+        report_name: str = "",
+        protocols: str = "",
+    ) -> None:
+        super().__init__(parent)
+        self.setWindowTitle(title)
+        self.setMinimumWidth(400)
+
+        layout = QVBoxLayout(self)
+        form = QFormLayout()
+
+        self.txt_name = QLineEdit(report_name)
+        form.addRow("報告書名:", self.txt_name)
+
+        self.txt_protocols = QLineEdit(protocols)
+        form.addRow("検索条件（プロトコル名、カンマ区切り）:", self.txt_protocols)
+
+        layout.addLayout(form)
+
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    def get_values(self) -> tuple[str, list[str]]:
+        """Return (report_name, protocol_list)."""
+        name = self.txt_name.text().strip()
+        protocols = [
+            p.strip() for p in self.txt_protocols.text().split(",") if p.strip()
+        ]
+        return name, protocols
 
 
 class SettingsPage(QDialog):
@@ -99,21 +145,16 @@ class SettingsPage(QDialog):
             tbl.setItem(i, 2, QTableWidgetItem(protocols))
 
     def _on_add_report(self) -> None:
-        report_id, ok = QInputDialog.getText(self, "報告書追加", "報告書ID:")
-        if not ok or not report_id:
+        dlg = _ReportDialog(self, title="報告書追加")
+        if dlg.exec() != QDialog.DialogCode.Accepted:
             return
 
-        report_name, ok = QInputDialog.getText(self, "報告書追加", "報告書名:")
-        if not ok or not report_name:
+        report_name, protocols = dlg.get_values()
+        if not report_name:
+            QMessageBox.warning(self, "警告", "報告書名を入力してください。")
             return
 
-        protocols_str, ok = QInputDialog.getText(
-            self, "報告書追加", "検索条件（プロトコル名、カンマ区切り）:"
-        )
-        if not ok:
-            return
-
-        protocols = [p.strip() for p in protocols_str.split(",") if p.strip()]
+        report_id = uuid.uuid4().hex[:8]
 
         new_report = ReportDefinition(
             report_id=report_id,
@@ -132,22 +173,20 @@ class SettingsPage(QDialog):
 
         r = self._config.report_definitions[row]
 
-        report_name, ok = QInputDialog.getText(
-            self, "報告書編集", "報告書名:", text=r.report_name
-        )
-        if not ok:
-            return
-
-        protocols_str, ok = QInputDialog.getText(
+        dlg = _ReportDialog(
             self,
-            "報告書編集",
-            "検索条件（プロトコル名、カンマ区切り）:",
-            text=", ".join(r.search_filters.get("protocol_name", [])),
+            title="報告書編集",
+            report_name=r.report_name,
+            protocols=", ".join(r.search_filters.get("protocol_name", [])),
         )
-        if not ok:
+        if dlg.exec() != QDialog.DialogCode.Accepted:
             return
 
-        protocols = [p.strip() for p in protocols_str.split(",") if p.strip()]
+        report_name, protocols = dlg.get_values()
+        if not report_name:
+            QMessageBox.warning(self, "警告", "報告書名を入力してください。")
+            return
+
         r.report_name = report_name
         r.search_filters = {"protocol_name": protocols}
         self._refresh_report_table()
