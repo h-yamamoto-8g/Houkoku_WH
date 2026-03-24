@@ -327,8 +327,8 @@ class SettingsPage(QDialog):
 
     # ---------- Close ----------
 
-    def _on_close(self) -> None:
-        # Validate and save
+    def _save_and_accept(self) -> None:
+        """Validate, save config to disk, and accept the dialog."""
         warnings = validate_config(self._config)
         if warnings:
             msg = "以下の警告があります:\n" + "\n".join(f"- {w}" for w in warnings)
@@ -341,3 +341,11 @@ class SettingsPage(QDialog):
         except FileNotFoundError as e:
             QMessageBox.critical(self, "エラー", str(e))
             self.reject()
+
+    def _on_close(self) -> None:
+        self._save_and_accept()
+
+    def closeEvent(self, event) -> None:  # noqa: N802
+        """Handle window close (×ボタン / Escキー) — save before closing."""
+        self._save_and_accept()
+        event.accept()
