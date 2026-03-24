@@ -172,6 +172,8 @@ class SettingsPage(QDialog):
         # Tab 3: Department Permissions
         self._ui.cmb_dept.currentIndexChanged.connect(self._on_perm_selection_changed)
         self._ui.cmb_perm_report.currentIndexChanged.connect(self._on_perm_selection_changed)
+        self._ui.btn_select_all.clicked.connect(lambda: self._set_all_samples(True))
+        self._ui.btn_deselect_all.clicked.connect(lambda: self._set_all_samples(False))
         self._ui.btn_save_perms.clicked.connect(self._on_save_perms)
 
         # Tab 4: Paths
@@ -393,6 +395,10 @@ class SettingsPage(QDialog):
             cb.setChecked(set_code in allowed)
             self._ui.sample_checkboxes.append(cb)
             self._ui.sample_list_layout.addWidget(cb)
+
+    def _set_all_samples(self, checked: bool) -> None:
+        for cb in self._ui.sample_checkboxes:
+            cb.setChecked(checked)
 
     def _on_save_perms(self) -> None:
         dept_idx = self._ui.cmb_dept.currentIndex()

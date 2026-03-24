@@ -134,7 +134,17 @@ class Ui_SettingsWindow:
         report_selector_layout.addWidget(self.cmb_perm_report)
         tab_perms_layout.addLayout(report_selector_layout)
 
-        tab_perms_layout.addWidget(QLabel("許可サンプル:"))
+        sample_header_layout = QHBoxLayout()
+        sample_header_layout.addWidget(QLabel("許可サンプル:"))
+        sample_header_layout.addStretch()
+        self.btn_select_all = QPushButton("全選択")
+        self.btn_deselect_all = QPushButton("全解除")
+        self.btn_select_all.setFixedWidth(70)
+        self.btn_deselect_all.setFixedWidth(70)
+        sample_header_layout.addWidget(self.btn_select_all)
+        sample_header_layout.addWidget(self.btn_deselect_all)
+        tab_perms_layout.addLayout(sample_header_layout)
+
         self.sample_scroll = QScrollArea()
         self.sample_scroll.setWidgetResizable(True)
         self.sample_widget = QWidget()
