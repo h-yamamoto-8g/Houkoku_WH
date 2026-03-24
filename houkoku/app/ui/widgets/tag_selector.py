@@ -116,13 +116,13 @@ class TagButton(QFrame):
     def _update_style(self):
         if self._selected:
             self.setStyleSheet(
-                "TagButton { background: #2196F3; border-radius: 4px; }"
+                "TagButton { background: #4CAF50; border: 1px solid #388E3C; border-radius: 4px; }"
                 "QLabel { color: white; font-weight: bold; }"
             )
         else:
             self.setStyleSheet(
-                "TagButton { background: #E0E0E0; border-radius: 4px; }"
-                "QLabel { color: #333; }"
+                "TagButton { background: transparent; border: 1px solid #BDBDBD; border-radius: 4px; }"
+                "QLabel { color: #555; }"
             )
 
     def mousePressEvent(self, event):  # noqa: N802
