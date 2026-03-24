@@ -153,6 +153,7 @@ class SettingsPage(QDialog):
         self._refresh_dept_combo()
         self._refresh_perm_report_combo()
         self._refresh_path_display()
+        self._on_perm_selection_changed()
 
     def _connect_signals(self) -> None:
         self._ui.btn_close.clicked.connect(self._on_close)
