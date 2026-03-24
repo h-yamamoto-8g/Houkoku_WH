@@ -137,7 +137,7 @@ class SettingsPage(QDialog):
         )
         self._report_svc = report_svc
         self._dirty = False
-        self._cached_df: object = None  # lazily loaded CSV DataFrame
+        self._cached_samples: list[dict] | None = None  # lazily loaded from valid_samples.json
 
         self._init_data()
         self._connect_signals()
@@ -325,6 +325,33 @@ class SettingsPage(QDialog):
             self._ui.cmb_perm_report.addItem(r.report_name, r.report_id)
         self._ui.cmb_perm_report.blockSignals(False)
 
+    def _load_valid_samples(self) -> list[dict]:
+        """Load and cache active WH samples from valid_samples.json."""
+        if self._cached_samples is not None:
+            return self._cached_samples
+
+        self._cached_samples = []
+        if _cfg.INTERNAL_PATH is None:
+            return self._cached_samples
+
+        json_path = _cfg.INTERNAL_PATH / "_common" / "master_data" / "source" / "valid_samples.json"
+        if not json_path.exists():
+            return self._cached_samples
+
+        import json
+
+        try:
+            data = json.loads(json_path.read_text(encoding="utf-8"))
+            items = data.get("items", [])
+            self._cached_samples = sorted(
+                [it for it in items if it.get("domain_code") == "WH" and it.get("is_active")],
+                key=lambda it: it.get("sort_order", 0),
+            )
+        except Exception:
+            pass
+
+        return self._cached_samples
+
     def _on_perm_selection_changed(self, _index: int = 0) -> None:
         dept_idx = self._ui.cmb_dept.currentIndex()
         report_idx = self._ui.cmb_perm_report.currentIndex()
@@ -341,28 +368,15 @@ class SettingsPage(QDialog):
         dept = self._config.departments[dept_idx]
         report = self._config.report_definitions[report_idx]
 
-        # Load sample codes directly from CSV (no report service dependency)
-        all_samples: list[str] = []
-        if _cfg.SOURCE_CSV_PATH and _cfg.SOURCE_CSV_PATH.exists():
-            from app.core import loader
-
-            try:
-                if self._cached_df is None:
-                    self._cached_df = loader.load_source_csv(_cfg.SOURCE_CSV_PATH)
-                filtered = loader.filter_by_report(self._cached_df, report.search_filters)
-                if not filtered.empty and "valid_sample_set_code" in filtered.columns:
-                    all_samples = sorted(
-                        filtered["valid_sample_set_code"].dropna().unique().tolist()
-                    )
-            except Exception:
-                pass
-
+        samples = self._load_valid_samples()
         allowed = dept.allowed_samples.get(report.report_id, [])
 
-        for sample_code in all_samples:
-            cb = QCheckBox(sample_code)
-            cb.setProperty("sample_code", sample_code)
-            cb.setChecked(sample_code in allowed)
+        for item in samples:
+            set_code = item.get("set_code", "")
+            display = item.get("display_name", set_code)
+            cb = QCheckBox(f"{set_code}  ({display})")
+            cb.setProperty("sample_code", set_code)
+            cb.setChecked(set_code in allowed)
             self._ui.sample_checkboxes.append(cb)
             self._ui.sample_list_layout.addWidget(cb)
 
