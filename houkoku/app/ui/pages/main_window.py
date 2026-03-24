@@ -7,9 +7,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QCheckBox,
     QMainWindow,
     QMessageBox,
     QTableWidgetItem,
@@ -133,7 +131,7 @@ class MainWindow(QMainWindow):
 
         self._current_job = job
         self._update_preview()
-        self._update_department_list()
+        self._update_dept_summaries()
 
     # ---------- Preview ----------
 
@@ -162,54 +160,23 @@ class MainWindow(QMainWindow):
                     row_idx, col_idx, QTableWidgetItem(str(val) if val is not None else "")
                 )
 
-    def _update_department_list(self) -> None:
+    def _update_dept_summaries(self) -> None:
         if self._current_report is None or self._current_job is None:
             return
-
         self._dept_summaries = self._report_svc.preview_departments(
             self._current_report, self._current_job
         )
-
-        # Clear existing checkboxes
-        for cb in self._ui.dept_checkboxes:
-            self._ui.dept_list_layout.removeWidget(cb)
-            cb.deleteLater()
-        self._ui.dept_checkboxes.clear()
-
-        # Create new checkboxes
-        for s in self._dept_summaries:
-            codes_str = ", ".join(s.sample_codes[:5])
-            if len(s.sample_codes) > 5:
-                codes_str += "..."
-
-            label = f"{s.dept_name}  →  {s.sample_count}件"
-            if codes_str:
-                label += f" ({codes_str})"
-
-            cb = QCheckBox(label)
-            cb.setProperty("dept_id", s.dept_id)
-            cb.setChecked(s.sample_count > 0)
-            cb.setEnabled(s.sample_count > 0)
-            self._ui.dept_checkboxes.append(cb)
-            self._ui.dept_list_layout.addWidget(cb)
 
     def _clear_preview(self) -> None:
         self._ui.lbl_sample_count.setText("対象サンプル: -")
         self._ui.tbl_preview.setRowCount(0)
         self._ui.tbl_preview.setColumnCount(0)
-        for cb in self._ui.dept_checkboxes:
-            self._ui.dept_list_layout.removeWidget(cb)
-            cb.deleteLater()
-        self._ui.dept_checkboxes.clear()
+        self._dept_summaries.clear()
 
     # ---------- Export ----------
 
     def _get_selected_dept_ids(self) -> list[str]:
-        return [
-            cb.property("dept_id")
-            for cb in self._ui.dept_checkboxes
-            if cb.isChecked()
-        ]
+        return [s.dept_id for s in self._dept_summaries if s.sample_count > 0]
 
     def _on_export(self) -> None:
         if self._current_report is None or self._current_job is None:
