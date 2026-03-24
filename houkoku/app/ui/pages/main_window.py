@@ -67,7 +67,7 @@ class MainWindow(QMainWindow):
 
     def _connect_signals(self) -> None:
         self._ui.cmb_report.currentIndexChanged.connect(self._on_report_changed)
-        self._ui.cmb_job.currentIndexChanged.connect(self._on_job_changed)
+        self._ui.btn_search.clicked.connect(self._on_search)
         self._ui.btn_export.clicked.connect(self._on_export)
         self._ui.btn_send.clicked.connect(self._on_send)
         self._ui.btn_settings.clicked.connect(self._on_settings)
@@ -105,18 +105,19 @@ class MainWindow(QMainWindow):
 
         if jobs:
             self._ui.cmb_job.setCurrentIndex(0)
-            self._on_job_changed(0)
         else:
             self._clear_preview()
 
-    def _on_job_changed(self, index: int) -> None:
-        if index < 0 or self._current_report is None:
+    def _on_search(self) -> None:
+        if self._current_report is None:
             return
 
-        self._current_job = self._ui.cmb_job.currentText()
-        if not self._current_job:
+        job = self._ui.cmb_job.currentText()
+        if not job:
+            QMessageBox.warning(self, "警告", "JOB番号を選択してください。")
             return
 
+        self._current_job = job
         self._update_preview()
         self._update_department_list()
 

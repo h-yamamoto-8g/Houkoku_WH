@@ -73,6 +73,10 @@ class Ui_MainWindow:
         row2.addWidget(self.cmb_job)
         grp_report_layout.addLayout(row2)
 
+        self.btn_search = QPushButton("検索")
+        self.btn_search.setFixedWidth(120)
+        grp_report_layout.addWidget(self.btn_search)
+
         root_layout.addWidget(grp_report)
 
         # --- Zone 2: Data Preview ---
