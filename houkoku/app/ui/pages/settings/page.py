@@ -78,6 +78,44 @@ class _ReportDialog(QDialog):
         return name, protocols
 
 
+class _DeptDialog(QDialog):
+    """Single dialog for adding/editing a department."""
+
+    def __init__(
+        self,
+        parent=None,
+        *,
+        title: str = "部署",
+        dept_name: str = "",
+        folder_name: str = "",
+    ) -> None:
+        super().__init__(parent)
+        self.setWindowTitle(title)
+        self.setMinimumWidth(400)
+
+        layout = QVBoxLayout(self)
+        form = QFormLayout()
+
+        self.txt_name = QLineEdit(dept_name)
+        form.addRow("部署名:", self.txt_name)
+
+        self.txt_folder = QLineEdit(folder_name)
+        form.addRow("フォルダ名:", self.txt_folder)
+
+        layout.addLayout(form)
+
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    def get_values(self) -> tuple[str, str]:
+        """Return (dept_name, folder_name)."""
+        return self.txt_name.text().strip(), self.txt_folder.text().strip()
+
+
 class SettingsPage(QDialog):
     """Settings dialog with three tabs."""
 
@@ -123,7 +161,10 @@ class SettingsPage(QDialog):
         self._ui.btn_edit_report.clicked.connect(self._on_edit_report)
         self._ui.btn_delete_report.clicked.connect(self._on_delete_report)
 
-        # Tab 2: Permissions
+        # Tab 2: Departments & Permissions
+        self._ui.btn_add_dept.clicked.connect(self._on_add_dept)
+        self._ui.btn_edit_dept.clicked.connect(self._on_edit_dept)
+        self._ui.btn_delete_dept.clicked.connect(self._on_delete_dept)
         self._ui.cmb_dept.currentIndexChanged.connect(self._on_perm_selection_changed)
         self._ui.cmb_perm_report.currentIndexChanged.connect(self._on_perm_selection_changed)
         self._ui.btn_save_perms.clicked.connect(self._on_save_perms)
@@ -214,6 +255,67 @@ class SettingsPage(QDialog):
         for d in self._config.departments:
             self._ui.cmb_dept.addItem(d.dept_name, d.dept_id)
         self._ui.cmb_dept.blockSignals(False)
+
+    def _on_add_dept(self) -> None:
+        dlg = _DeptDialog(self, title="部署追加")
+        if dlg.exec() != QDialog.DialogCode.Accepted:
+            return
+
+        dept_name, folder_name = dlg.get_values()
+        if not dept_name:
+            QMessageBox.warning(self, "警告", "部署名を入力してください。")
+            return
+
+        dept_id = uuid.uuid4().hex[:8]
+        new_dept = Department(
+            dept_id=dept_id,
+            dept_name=dept_name,
+            folder_name=folder_name,
+        )
+        self._config.departments.append(new_dept)
+        self._refresh_dept_combo()
+        # 追加した部署を選択状態にする
+        self._ui.cmb_dept.setCurrentIndex(self._ui.cmb_dept.count() - 1)
+
+    def _on_edit_dept(self) -> None:
+        idx = self._ui.cmb_dept.currentIndex()
+        if idx < 0:
+            QMessageBox.warning(self, "警告", "編集する部署を選択してください。")
+            return
+
+        d = self._config.departments[idx]
+        dlg = _DeptDialog(
+            self,
+            title="部署編集",
+            dept_name=d.dept_name,
+            folder_name=d.folder_name,
+        )
+        if dlg.exec() != QDialog.DialogCode.Accepted:
+            return
+
+        dept_name, folder_name = dlg.get_values()
+        if not dept_name:
+            QMessageBox.warning(self, "警告", "部署名を入力してください。")
+            return
+
+        d.dept_name = dept_name
+        d.folder_name = folder_name
+        self._refresh_dept_combo()
+        self._ui.cmb_dept.setCurrentIndex(idx)
+
+    def _on_delete_dept(self) -> None:
+        idx = self._ui.cmb_dept.currentIndex()
+        if idx < 0:
+            QMessageBox.warning(self, "警告", "削除する部署を選択してください。")
+            return
+
+        d = self._config.departments[idx]
+        ans = QMessageBox.question(
+            self, "確認", f"部署「{d.dept_name}」を削除しますか？"
+        )
+        if ans == QMessageBox.StandardButton.Yes:
+            self._config.departments.pop(idx)
+            self._refresh_dept_combo()
 
     def _refresh_perm_report_combo(self) -> None:
         self._ui.cmb_perm_report.blockSignals(True)
