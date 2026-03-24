@@ -4,7 +4,7 @@ NOTE: In production this would be generated from settingswindow.ui via pyside6-u
 For initial development, we create the UI programmatically following the
 design spec wireframe (section 3.2).
 
-Three tabs: 報告書管理 / 部署別権限 / パス設定
+Four tabs: 報告書管理 / 部署管理 / 部署別権限 / パス設定
 """
 
 from __future__ import annotations
@@ -87,26 +87,44 @@ class Ui_SettingsWindow:
 
         self.tabs.addTab(tab_reports, "報告書管理")
 
-        # ===== Tab 2: Department Permissions =====
-        tab_perms = QWidget()
-        tab_perms_layout = QVBoxLayout(tab_perms)
+        # ===== Tab 2: Department Management =====
+        tab_depts = QWidget()
+        tab_depts_layout = QVBoxLayout(tab_depts)
 
-        # -- Department management row --
-        dept_mgmt_layout = QHBoxLayout()
-        dept_mgmt_layout.addWidget(QLabel("部署:"))
-        self.cmb_dept = QComboBox()
-        self.cmb_dept.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        dept_mgmt_layout.addWidget(self.cmb_dept)
+        self.tbl_depts = QTableWidget()
+        self.tbl_depts.setColumnCount(3)
+        self.tbl_depts.setHorizontalHeaderLabels(["部署ID", "部署名", "フォルダ名"])
+        self.tbl_depts.horizontalHeader().setStretchLastSection(True)
+        self.tbl_depts.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.ResizeToContents
+        )
+        self.tbl_depts.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.tbl_depts.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        tab_depts_layout.addWidget(self.tbl_depts)
+
+        dept_btn_row = QHBoxLayout()
         self.btn_add_dept = QPushButton("追加")
         self.btn_edit_dept = QPushButton("編集")
         self.btn_delete_dept = QPushButton("削除")
-        self.btn_add_dept.setFixedWidth(60)
-        self.btn_edit_dept.setFixedWidth(60)
-        self.btn_delete_dept.setFixedWidth(60)
-        dept_mgmt_layout.addWidget(self.btn_add_dept)
-        dept_mgmt_layout.addWidget(self.btn_edit_dept)
-        dept_mgmt_layout.addWidget(self.btn_delete_dept)
-        tab_perms_layout.addLayout(dept_mgmt_layout)
+        dept_btn_row.addWidget(self.btn_add_dept)
+        dept_btn_row.addWidget(self.btn_edit_dept)
+        dept_btn_row.addWidget(self.btn_delete_dept)
+        dept_btn_row.addStretch()
+        tab_depts_layout.addLayout(dept_btn_row)
+
+        self.tabs.addTab(tab_depts, "部署管理")
+
+        # ===== Tab 3: Department Permissions =====
+        tab_perms = QWidget()
+        tab_perms_layout = QVBoxLayout(tab_perms)
+
+        # -- Department selector row --
+        dept_selector_layout = QHBoxLayout()
+        dept_selector_layout.addWidget(QLabel("部署:"))
+        self.cmb_dept = QComboBox()
+        self.cmb_dept.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        dept_selector_layout.addWidget(self.cmb_dept)
+        tab_perms_layout.addLayout(dept_selector_layout)
 
         # -- Report selector row --
         report_selector_layout = QHBoxLayout()
