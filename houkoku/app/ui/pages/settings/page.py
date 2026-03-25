@@ -14,7 +14,6 @@ from typing import Optional
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QAbstractItemView,
     QCheckBox,
     QDialog,
     QDialogButtonBox,
@@ -195,9 +194,8 @@ class SettingsPage(QDialog):
         self._ui.btn_browse_internal.clicked.connect(self._on_browse_internal)
         self._ui.btn_browse_external.clicked.connect(self._on_browse_external)
 
-        # Tab 5: Column Settings
-        self._col_editing = False
-        self._ui.btn_col_edit.clicked.connect(self._on_col_edit_toggle)
+        # Tab 5: Column Settings — edits stay in _col_draft until save
+        self._col_draft: list[ColumnSetting] = []
         self._ui.btn_col_save.clicked.connect(self._on_col_save)
         self._ui.btn_col_up.clicked.connect(self._on_col_up)
         self._ui.btn_col_down.clicked.connect(self._on_col_down)
@@ -444,11 +442,19 @@ class SettingsPage(QDialog):
     # ---------- Tab 5: Column Settings ----------
 
     def _refresh_column_table(self) -> None:
+        """Populate table from _col_draft (working copy, not yet saved)."""
+        # Rebuild draft from config if empty
+        if not self._col_draft:
+            self._col_draft = [
+                ColumnSetting(c.column_key, c.display_name, c.visible)
+                for c in self._config.column_settings
+            ]
+
         tbl = self._ui.tbl_columns
         tbl.blockSignals(True)
-        tbl.setRowCount(len(self._config.column_settings))
+        tbl.setRowCount(len(self._col_draft))
 
-        for i, col in enumerate(self._config.column_settings):
+        for i, col in enumerate(self._col_draft):
             # Checkbox for visibility
             cb = QCheckBox()
             cb.setChecked(col.visible)
@@ -458,65 +464,54 @@ class SettingsPage(QDialog):
 
             # Column key (read-only)
             key_item = QTableWidgetItem(col.column_key)
+            key_item.setFlags(key_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+            key_item.setBackground(Qt.GlobalColor.transparent)
             tbl.setItem(i, 1, key_item)
 
-            # Display name
-            tbl.setItem(i, 2, QTableWidgetItem(col.display_name))
+            # Display name (editable — white background to indicate editable)
+            name_item = QTableWidgetItem(col.display_name)
+            name_item.setFlags(name_item.flags() | Qt.ItemFlag.ItemIsEditable)
+            tbl.setItem(i, 2, name_item)
 
         tbl.blockSignals(False)
 
     def _on_col_visible_changed(self, row: int, state: int) -> None:
-        if 0 <= row < len(self._config.column_settings):
-            self._config.column_settings[row].visible = state == Qt.CheckState.Checked.value
-
-    def _on_col_edit_toggle(self) -> None:
-        """Toggle edit mode — make the display name column editable like Excel."""
-        self._col_editing = True
-        self._ui.btn_col_edit.setEnabled(False)
-        self._ui.btn_col_save.setEnabled(True)
-        # Allow editing only the display name column (col 2)
-        self._ui.tbl_columns.setEditTriggers(
-            QAbstractItemView.EditTrigger.DoubleClicked | QAbstractItemView.EditTrigger.SelectedClicked
-        )
-        # Make column key (col 1) items non-editable, display name (col 2) editable
-        for row in range(self._ui.tbl_columns.rowCount()):
-            key_item = self._ui.tbl_columns.item(row, 1)
-            if key_item:
-                key_item.setFlags(key_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
-            name_item = self._ui.tbl_columns.item(row, 2)
-            if name_item:
-                name_item.setFlags(name_item.flags() | Qt.ItemFlag.ItemIsEditable)
+        if 0 <= row < len(self._col_draft):
+            self._col_draft[row].visible = state == Qt.CheckState.Checked.value
 
     def _on_col_save(self) -> None:
-        """Save edits from the table back to config and exit edit mode."""
+        """Apply draft edits (table content) to config and save to disk."""
         tbl = self._ui.tbl_columns
+        # Read back display names from table cells
         for row in range(tbl.rowCount()):
             item = tbl.item(row, 2)
-            if item and 0 <= row < len(self._config.column_settings):
-                self._config.column_settings[row].display_name = item.text()
+            if item and 0 <= row < len(self._col_draft):
+                self._col_draft[row].display_name = item.text()
 
-        # Exit edit mode
-        self._col_editing = False
-        self._ui.btn_col_edit.setEnabled(True)
-        self._ui.btn_col_save.setEnabled(False)
-        self._ui.tbl_columns.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self._refresh_column_table()
+        # Write draft to config
+        self._config.column_settings = [
+            ColumnSetting(c.column_key, c.display_name, c.visible)
+            for c in self._col_draft
+        ]
+        try:
+            save_config(self._config)
+            QMessageBox.information(self, "保存", "列設定を保存しました。")
+        except FileNotFoundError as e:
+            QMessageBox.critical(self, "エラー", str(e))
 
     def _on_col_up(self) -> None:
         row = self._ui.tbl_columns.currentRow()
         if row <= 0:
             return
-        cs = self._config.column_settings
-        cs[row - 1], cs[row] = cs[row], cs[row - 1]
+        self._col_draft[row - 1], self._col_draft[row] = self._col_draft[row], self._col_draft[row - 1]
         self._refresh_column_table()
         self._ui.tbl_columns.setCurrentCell(row - 1, 1)
 
     def _on_col_down(self) -> None:
         row = self._ui.tbl_columns.currentRow()
-        cs = self._config.column_settings
-        if row < 0 or row >= len(cs) - 1:
+        if row < 0 or row >= len(self._col_draft) - 1:
             return
-        cs[row], cs[row + 1] = cs[row + 1], cs[row]
+        self._col_draft[row], self._col_draft[row + 1] = self._col_draft[row + 1], self._col_draft[row]
         self._refresh_column_table()
         self._ui.tbl_columns.setCurrentCell(row + 1, 1)
 
