@@ -199,6 +199,7 @@ class SettingsPage(QDialog):
         self._ui.btn_col_save.clicked.connect(self._on_col_save)
         self._ui.btn_col_up.clicked.connect(self._on_col_up)
         self._ui.btn_col_down.clicked.connect(self._on_col_down)
+        self._ui.tbl_columns.cellClicked.connect(self._on_col_cell_clicked)
 
     # ---------- Tab 1: Report Management ----------
 
@@ -474,6 +475,11 @@ class SettingsPage(QDialog):
             tbl.setItem(i, 2, name_item)
 
         tbl.blockSignals(False)
+
+    def _on_col_cell_clicked(self, row: int, col: int) -> None:
+        """When a row is clicked, automatically start editing the display name cell."""
+        if col != 0:  # Don't interfere with checkbox column
+            self._ui.tbl_columns.editItem(self._ui.tbl_columns.item(row, 2))
 
     def _on_col_visible_changed(self, row: int, state: int) -> None:
         if 0 <= row < len(self._col_draft):

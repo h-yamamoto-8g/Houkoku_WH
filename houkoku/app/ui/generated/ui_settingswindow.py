@@ -186,7 +186,8 @@ class Ui_SettingsWindow:
         )
         self.tbl_columns.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.tbl_columns.setEditTriggers(
-            QTableWidget.EditTrigger.DoubleClicked | QTableWidget.EditTrigger.SelectedClicked
+            QTableWidget.EditTrigger.DoubleClicked
+            | QTableWidget.EditTrigger.SelectedClicked
         )
         self.tbl_columns.verticalHeader().setVisible(False)
         tab_columns_layout.addWidget(self.tbl_columns)
