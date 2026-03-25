@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
     QTableWidgetItem,
 )
 
-from app.core.config_store import AppConfig, ReportDefinition
+from app.core.config_store import AppConfig, DEFAULT_COLUMN_SETTINGS, ReportDefinition
 from app.core.permission_store import DepartmentSummary
 from app.services.report_service import ReportService
 from app.services import notification_service
@@ -21,19 +21,6 @@ from app.ui.dialogs.loading_dialog import LoadingOverlay, WorkerThread
 from app.ui.dialogs.send_confirm_dialog import SendConfirmDialog
 from app.ui.generated.ui_mainwindow import Ui_MainWindow
 
-
-# Preview columns to show (subset of the 51 CSV columns)
-PREVIEW_COLUMNS = [
-    "sample_code",
-    "sample_name",
-    "valid_sample_set_code",
-    "sample_job_number",
-    "request_protocol",
-    "holder_name",
-    "test_name",
-    "test_reported_data",
-    "test_unit_name",
-]
 
 
 class MainWindow(QMainWindow):
@@ -141,9 +128,16 @@ class MainWindow(QMainWindow):
         ]
         df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
-        # Show subset of columns that exist
-        cols = [c for c in PREVIEW_COLUMNS if c in df.columns]
-        display = df[cols] if cols else df
+        # Determine columns from config (visible only, preserving order)
+        col_settings = (
+            self._config.column_settings
+            if self._config and self._config.column_settings
+            else DEFAULT_COLUMN_SETTINGS
+        )
+        visible_cols = [c for c in col_settings if c.visible and c.column_key in df.columns]
+        col_keys = [c.column_key for c in visible_cols]
+        col_labels = [c.display_name for c in visible_cols]
+        display = df[col_keys] if col_keys else df
 
         unique_samples = df["valid_sample_set_code"].nunique() if not df.empty else 0
         self._ui.lbl_sample_count.setText(f"対象サンプル: {unique_samples}件 ({len(df)}行)")
@@ -151,7 +145,7 @@ class MainWindow(QMainWindow):
         # Populate table
         self._ui.tbl_preview.setRowCount(len(display))
         self._ui.tbl_preview.setColumnCount(len(display.columns))
-        self._ui.tbl_preview.setHorizontalHeaderLabels(list(display.columns))
+        self._ui.tbl_preview.setHorizontalHeaderLabels(col_labels if col_keys else list(display.columns))
 
         for row_idx in range(len(display)):
             for col_idx, col_name in enumerate(display.columns):

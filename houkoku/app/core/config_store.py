@@ -38,6 +38,72 @@ class Department:
 
 
 @dataclass
+class ColumnSetting:
+    """A single column display configuration."""
+
+    column_key: str = ""
+    display_name: str = ""
+    visible: bool = True
+
+
+# Default column settings (key -> Japanese display name)
+DEFAULT_COLUMN_SETTINGS: list[ColumnSetting] = [
+    ColumnSetting("sample_code", "サンプルコード", True),
+    ColumnSetting("sample_name", "サンプル名", True),
+    ColumnSetting("valid_sample_set_code", "サンプルセットコード", True),
+    ColumnSetting("sample_job_number", "JOB番号", True),
+    ColumnSetting("request_protocol", "プロトコル", True),
+    ColumnSetting("holder_name", "保持者名", True),
+    ColumnSetting("test_name", "テスト名", True),
+    ColumnSetting("test_reported_data", "報告データ", True),
+    ColumnSetting("test_unit_name", "単位", True),
+    ColumnSetting("sample_request_number", "依頼番号", False),
+    ColumnSetting("sample_sampling_date", "採取日", False),
+    ColumnSetting("sample_sampling_date_sample", "採取日（サンプル）", False),
+    ColumnSetting("sample_measurement_date", "測定日", False),
+    ColumnSetting("sample_job_branch_number", "JOB枝番", False),
+    ColumnSetting("sample_protocol_name", "プロトコル名（サンプル）", False),
+    ColumnSetting("sample_material_or_facility_name", "物質/施設名", False),
+    ColumnSetting("holder_code", "保持者コード", False),
+    ColumnSetting("test_code", "テストコード", False),
+    ColumnSetting("test_raw_data", "生データ", False),
+    ColumnSetting("test_unit_code", "単位コード", False),
+    ColumnSetting("test_upper_limit_spec_1", "上限規格1", False),
+    ColumnSetting("test_lower_limit_spec_1", "下限規格1", False),
+    ColumnSetting("test_upper_limit_spec_2", "上限規格2", False),
+    ColumnSetting("test_lower_limit_spec_2", "下限規格2", False),
+    ColumnSetting("test_upper_limit_spec_3", "上限規格3", False),
+    ColumnSetting("test_lower_limit_spec_3", "下限規格3", False),
+    ColumnSetting("test_upper_limit_spec_4", "上限規格4", False),
+    ColumnSetting("test_lower_limit_spec_4", "下限規格4", False),
+    ColumnSetting("test_upper_quantitation_limit", "定量上限", False),
+    ColumnSetting("test_lower_quantitation_limit", "定量下限", False),
+    ColumnSetting("sample_requester", "依頼者", False),
+    ColumnSetting("sample_approver", "承認者", False),
+    ColumnSetting("sample_approver_name", "承認者名", False),
+    ColumnSetting("sample_overall_judge", "総合判定", False),
+    ColumnSetting("sample_overall_judge_name", "総合判定名", False),
+    ColumnSetting("sample_status", "サンプルステータス", False),
+    ColumnSetting("test_status", "テストステータス", False),
+    ColumnSetting("test_grade_code", "グレードコード", False),
+    ColumnSetting("sample_out_of_spec_flag", "規格外フラグ", False),
+    ColumnSetting("test_judgment", "テスト判定", False),
+    ColumnSetting("test_hidden_flag", "非表示フラグ", False),
+    ColumnSetting("test_report_value_flag", "報告値フラグ", False),
+    ColumnSetting("valid_sample_display_name", "サンプル表示名", False),
+    ColumnSetting("valid_holder_set_code", "保持者セットコード", False),
+    ColumnSetting("valid_holder_display_name", "保持者表示名", False),
+    ColumnSetting("valid_test_set_code", "テストセットコード", False),
+    ColumnSetting("valid_test_display_name", "テスト表示名", False),
+    ColumnSetting("holder_group_code", "保持者グループコード", False),
+    ColumnSetting("trend_enabled", "トレンド有効", False),
+    ColumnSetting("test_domain_code", "テストドメインコード", False),
+    ColumnSetting("request_protocol_name", "依頼プロトコル名", False),
+    ColumnSetting("request_protocol_code", "依頼プロトコルコード", False),
+]
+
+
+@dataclass
 class AppConfig:
     """Top-level application configuration."""
 
@@ -45,6 +111,7 @@ class AppConfig:
     sharepoint_paths: dict[str, str] = field(default_factory=dict)
     report_definitions: list[ReportDefinition] = field(default_factory=list)
     departments: list[Department] = field(default_factory=list)
+    column_settings: list[ColumnSetting] = field(default_factory=list)
 
 
 # ---------- Serialization helpers ----------
@@ -76,6 +143,14 @@ def _department_from_dict(d: dict) -> Department:
     )
 
 
+def _column_setting_from_dict(d: dict) -> ColumnSetting:
+    return ColumnSetting(
+        column_key=d.get("column_key", ""),
+        display_name=d.get("display_name", ""),
+        visible=d.get("visible", True),
+    )
+
+
 # ---------- Public API ----------
 
 
@@ -92,6 +167,12 @@ def load_config() -> AppConfig:
         return cfg
 
     raw = json.loads(path.read_text(encoding="utf-8"))
+    column_settings = [
+        _column_setting_from_dict(c) for c in raw.get("column_settings", [])
+    ]
+    # If no column_settings saved yet, use defaults
+    if not column_settings:
+        column_settings = [ColumnSetting(c.column_key, c.display_name, c.visible) for c in DEFAULT_COLUMN_SETTINGS]
     return AppConfig(
         version=raw.get("version", "1.0"),
         sharepoint_paths=raw.get("sharepoint_paths", {}),
@@ -99,6 +180,7 @@ def load_config() -> AppConfig:
             _report_def_from_dict(r) for r in raw.get("report_definitions", [])
         ],
         departments=[_department_from_dict(d) for d in raw.get("departments", [])],
+        column_settings=column_settings,
     )
 
 
@@ -112,6 +194,7 @@ def save_config(config: AppConfig) -> None:
         "sharepoint_paths": config.sharepoint_paths,
         "report_definitions": [asdict(r) for r in config.report_definitions],
         "departments": [asdict(d) for d in config.departments],
+        "column_settings": [asdict(c) for c in config.column_settings],
     }
     path.write_text(
         json.dumps(data, ensure_ascii=False, indent=2),
@@ -150,4 +233,8 @@ def create_default_config() -> AppConfig:
         },
         report_definitions=[],
         departments=[],
+        column_settings=[
+            ColumnSetting(c.column_key, c.display_name, c.visible)
+            for c in DEFAULT_COLUMN_SETTINGS
+        ],
     )

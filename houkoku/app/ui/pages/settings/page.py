@@ -12,6 +12,7 @@ import uuid
 from pathlib import Path
 from typing import Optional
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QCheckBox,
     QDialog,
@@ -27,6 +28,8 @@ from PySide6.QtWidgets import (
 import app.config as _cfg
 from app.core.config_store import (
     AppConfig,
+    ColumnSetting,
+    DEFAULT_COLUMN_SETTINGS,
     Department,
     ReportDefinition,
     save_config,
@@ -134,7 +137,17 @@ class SettingsPage(QDialog):
             sharepoint_paths=dict(config.sharepoint_paths),
             report_definitions=list(config.report_definitions),
             departments=list(config.departments),
+            column_settings=[
+                ColumnSetting(c.column_key, c.display_name, c.visible)
+                for c in config.column_settings
+            ],
         )
+        # Ensure column_settings has defaults if empty
+        if not self._config.column_settings:
+            self._config.column_settings = [
+                ColumnSetting(c.column_key, c.display_name, c.visible)
+                for c in DEFAULT_COLUMN_SETTINGS
+            ]
         self._report_svc = report_svc
         self._dirty = False
         self._cached_samples: list[dict] | None = None  # lazily loaded from valid_samples.json
@@ -155,6 +168,7 @@ class SettingsPage(QDialog):
         self._refresh_perm_report_combo()
         self._refresh_path_display()
         self._on_perm_selection_changed()
+        self._refresh_column_table()
 
     def _connect_signals(self) -> None:
         self._ui.btn_close.clicked.connect(self._on_close)
@@ -179,6 +193,12 @@ class SettingsPage(QDialog):
         # Tab 4: Paths
         self._ui.btn_browse_internal.clicked.connect(self._on_browse_internal)
         self._ui.btn_browse_external.clicked.connect(self._on_browse_external)
+
+        # Tab 5: Column Settings
+        self._ui.btn_col_up.clicked.connect(self._on_col_up)
+        self._ui.btn_col_down.clicked.connect(self._on_col_down)
+        self._ui.btn_col_reset.clicked.connect(self._on_col_reset)
+        self._ui.tbl_columns.cellChanged.connect(self._on_column_cell_changed)
 
     # ---------- Tab 1: Report Management ----------
 
@@ -418,6 +438,70 @@ class SettingsPage(QDialog):
 
         dept.allowed_samples[report.report_id] = selected
         QMessageBox.information(self, "保存", "権限設定を保存しました。")
+
+    # ---------- Tab 5: Column Settings ----------
+
+    def _refresh_column_table(self) -> None:
+        tbl = self._ui.tbl_columns
+        tbl.blockSignals(True)
+        tbl.setRowCount(len(self._config.column_settings))
+
+        for i, col in enumerate(self._config.column_settings):
+            # Checkbox for visibility
+            cb = QCheckBox()
+            cb.setChecked(col.visible)
+            cb.setStyleSheet("margin-left: 16px;")
+            cb.stateChanged.connect(lambda state, row=i: self._on_col_visible_changed(row, state))
+            tbl.setCellWidget(i, 0, cb)
+
+            # Column key (read-only)
+            key_item = QTableWidgetItem(col.column_key)
+            key_item.setFlags(key_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+            tbl.setItem(i, 1, key_item)
+
+            # Display name (editable)
+            tbl.setItem(i, 2, QTableWidgetItem(col.display_name))
+
+        tbl.blockSignals(False)
+
+    def _on_col_visible_changed(self, row: int, state: int) -> None:
+        if 0 <= row < len(self._config.column_settings):
+            self._config.column_settings[row].visible = state == Qt.CheckState.Checked.value
+
+    def _on_column_cell_changed(self, row: int, col: int) -> None:
+        if col == 2 and 0 <= row < len(self._config.column_settings):
+            item = self._ui.tbl_columns.item(row, 2)
+            if item:
+                self._config.column_settings[row].display_name = item.text()
+
+    def _on_col_up(self) -> None:
+        row = self._ui.tbl_columns.currentRow()
+        if row <= 0:
+            return
+        cs = self._config.column_settings
+        cs[row - 1], cs[row] = cs[row], cs[row - 1]
+        self._refresh_column_table()
+        self._ui.tbl_columns.setCurrentCell(row - 1, 1)
+
+    def _on_col_down(self) -> None:
+        row = self._ui.tbl_columns.currentRow()
+        cs = self._config.column_settings
+        if row < 0 or row >= len(cs) - 1:
+            return
+        cs[row], cs[row + 1] = cs[row + 1], cs[row]
+        self._refresh_column_table()
+        self._ui.tbl_columns.setCurrentCell(row + 1, 1)
+
+    def _on_col_reset(self) -> None:
+        ans = QMessageBox.question(
+            self, "確認", "列設定を初期値に戻しますか？"
+        )
+        if ans == QMessageBox.StandardButton.Yes:
+            self._config.column_settings = [
+                ColumnSetting(c.column_key, c.display_name, c.visible)
+                for c in DEFAULT_COLUMN_SETTINGS
+            ]
+            self._refresh_column_table()
 
     # ---------- Tab 4: Path Settings ----------
 

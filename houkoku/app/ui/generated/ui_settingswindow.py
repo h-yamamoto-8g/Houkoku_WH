@@ -164,7 +164,46 @@ class Ui_SettingsWindow:
 
         self.tabs.addTab(tab_perms, "部署別権限")
 
-        # ===== Tab 3: Path Settings =====
+        # ===== Tab 5: Column Settings =====
+        tab_columns = QWidget()
+        tab_columns_layout = QVBoxLayout(tab_columns)
+
+        col_desc = QLabel("表示する列と表示名を設定します。チェックボックスで表示/非表示、表示名は直接編集できます。")
+        col_desc.setWordWrap(True)
+        col_desc.setStyleSheet("color: gray; font-size: 11px; margin-bottom: 4px;")
+        tab_columns_layout.addWidget(col_desc)
+
+        self.tbl_columns = QTableWidget()
+        self.tbl_columns.setColumnCount(3)
+        self.tbl_columns.setHorizontalHeaderLabels(["表示", "列キー", "表示名"])
+        self.tbl_columns.horizontalHeader().setStretchLastSection(True)
+        self.tbl_columns.horizontalHeader().setSectionResizeMode(
+            0, QHeaderView.ResizeMode.Fixed
+        )
+        self.tbl_columns.setColumnWidth(0, 50)
+        self.tbl_columns.horizontalHeader().setSectionResizeMode(
+            1, QHeaderView.ResizeMode.ResizeToContents
+        )
+        self.tbl_columns.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.tbl_columns.verticalHeader().setVisible(False)
+        tab_columns_layout.addWidget(self.tbl_columns)
+
+        col_btn_row = QHBoxLayout()
+        self.btn_col_up = QPushButton("上へ")
+        self.btn_col_down = QPushButton("下へ")
+        self.btn_col_up.setFixedWidth(80)
+        self.btn_col_down.setFixedWidth(80)
+        col_btn_row.addWidget(self.btn_col_up)
+        col_btn_row.addWidget(self.btn_col_down)
+        col_btn_row.addStretch()
+        self.btn_col_reset = QPushButton("初期値に戻す")
+        self.btn_col_reset.setFixedWidth(120)
+        col_btn_row.addWidget(self.btn_col_reset)
+        tab_columns_layout.addLayout(col_btn_row)
+
+        self.tabs.addTab(tab_columns, "列設定")
+
+        # ===== Tab 4: Path Settings =====
         tab_paths = QWidget()
         tab_paths_layout = QVBoxLayout(tab_paths)
 
