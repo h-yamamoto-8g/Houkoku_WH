@@ -168,7 +168,7 @@ class Ui_SettingsWindow:
         tab_columns = QWidget()
         tab_columns_layout = QVBoxLayout(tab_columns)
 
-        col_desc = QLabel("表示する列と表示名を設定します。チェックボックスで表示/非表示、表示名は直接編集できます。")
+        col_desc = QLabel("表示する列と表示名を設定します。チェックボックスで表示/非表示を切り替え、編集ボタンで表示名を変更できます。")
         col_desc.setWordWrap(True)
         col_desc.setStyleSheet("color: gray; font-size: 11px; margin-bottom: 4px;")
         tab_columns_layout.addWidget(col_desc)
@@ -185,14 +185,18 @@ class Ui_SettingsWindow:
             1, QHeaderView.ResizeMode.ResizeToContents
         )
         self.tbl_columns.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.tbl_columns.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.tbl_columns.verticalHeader().setVisible(False)
         tab_columns_layout.addWidget(self.tbl_columns)
 
         col_btn_row = QHBoxLayout()
+        self.btn_col_edit = QPushButton("編集")
         self.btn_col_up = QPushButton("上へ")
         self.btn_col_down = QPushButton("下へ")
+        self.btn_col_edit.setFixedWidth(80)
         self.btn_col_up.setFixedWidth(80)
         self.btn_col_down.setFixedWidth(80)
+        col_btn_row.addWidget(self.btn_col_edit)
         col_btn_row.addWidget(self.btn_col_up)
         col_btn_row.addWidget(self.btn_col_down)
         col_btn_row.addStretch()

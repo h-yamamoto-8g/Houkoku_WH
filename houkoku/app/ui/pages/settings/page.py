@@ -119,6 +119,51 @@ class _DeptDialog(QDialog):
         return self.txt_name.text().strip(), self.txt_folder.text().strip()
 
 
+class _ColumnDialog(QDialog):
+    """Dialog for editing a column's display name and visibility."""
+
+    def __init__(
+        self,
+        parent=None,
+        *,
+        title: str = "列設定",
+        column_key: str = "",
+        display_name: str = "",
+        visible: bool = True,
+    ) -> None:
+        super().__init__(parent)
+        self.setWindowTitle(title)
+        self.setMinimumWidth(400)
+
+        layout = QVBoxLayout(self)
+        form = QFormLayout()
+
+        self.lbl_key = QLineEdit(column_key)
+        self.lbl_key.setReadOnly(True)
+        self.lbl_key.setStyleSheet("background: #f0f0f0;")
+        form.addRow("列キー:", self.lbl_key)
+
+        self.txt_display_name = QLineEdit(display_name)
+        form.addRow("表示名:", self.txt_display_name)
+
+        self.chk_visible = QCheckBox("表示する")
+        self.chk_visible.setChecked(visible)
+        form.addRow("表示:", self.chk_visible)
+
+        layout.addLayout(form)
+
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    def get_values(self) -> tuple[str, bool]:
+        """Return (display_name, visible)."""
+        return self.txt_display_name.text().strip(), self.chk_visible.isChecked()
+
+
 class SettingsPage(QDialog):
     """Settings dialog with three tabs."""
 
@@ -195,10 +240,10 @@ class SettingsPage(QDialog):
         self._ui.btn_browse_external.clicked.connect(self._on_browse_external)
 
         # Tab 5: Column Settings
+        self._ui.btn_col_edit.clicked.connect(self._on_edit_column)
         self._ui.btn_col_up.clicked.connect(self._on_col_up)
         self._ui.btn_col_down.clicked.connect(self._on_col_down)
         self._ui.btn_col_reset.clicked.connect(self._on_col_reset)
-        self._ui.tbl_columns.cellChanged.connect(self._on_column_cell_changed)
 
     # ---------- Tab 1: Report Management ----------
 
@@ -456,10 +501,9 @@ class SettingsPage(QDialog):
 
             # Column key (read-only)
             key_item = QTableWidgetItem(col.column_key)
-            key_item.setFlags(key_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
             tbl.setItem(i, 1, key_item)
 
-            # Display name (editable)
+            # Display name (read-only in table, edit via dialog)
             tbl.setItem(i, 2, QTableWidgetItem(col.display_name))
 
         tbl.blockSignals(False)
@@ -468,11 +512,31 @@ class SettingsPage(QDialog):
         if 0 <= row < len(self._config.column_settings):
             self._config.column_settings[row].visible = state == Qt.CheckState.Checked.value
 
-    def _on_column_cell_changed(self, row: int, col: int) -> None:
-        if col == 2 and 0 <= row < len(self._config.column_settings):
-            item = self._ui.tbl_columns.item(row, 2)
-            if item:
-                self._config.column_settings[row].display_name = item.text()
+    def _on_edit_column(self) -> None:
+        row = self._ui.tbl_columns.currentRow()
+        if row < 0:
+            QMessageBox.warning(self, "警告", "編集する列を選択してください。")
+            return
+
+        col = self._config.column_settings[row]
+        dlg = _ColumnDialog(
+            self,
+            title="列設定の編集",
+            column_key=col.column_key,
+            display_name=col.display_name,
+            visible=col.visible,
+        )
+        if dlg.exec() != QDialog.DialogCode.Accepted:
+            return
+
+        display_name, visible = dlg.get_values()
+        if not display_name:
+            QMessageBox.warning(self, "警告", "表示名を入力してください。")
+            return
+
+        col.display_name = display_name
+        col.visible = visible
+        self._refresh_column_table()
 
     def _on_col_up(self) -> None:
         row = self._ui.tbl_columns.currentRow()
