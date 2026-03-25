@@ -59,8 +59,12 @@ class Ui_MainWindow:
         grp_report = QGroupBox("① 報告書選択")
         grp_report_layout = QVBoxLayout(grp_report)
 
+        _transparent_label = "background: transparent;"
+
         row1 = QHBoxLayout()
-        row1.addWidget(QLabel("報告書:"))
+        lbl_report = QLabel("報告書:")
+        lbl_report.setStyleSheet(_transparent_label)
+        row1.addWidget(lbl_report)
         self.cmb_report = QComboBox()
         self.cmb_report.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         row1.addWidget(self.cmb_report)
@@ -69,6 +73,7 @@ class Ui_MainWindow:
         job_row = QHBoxLayout()
         job_row.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         job_lbl = QLabel("JOB番号:")
+        job_lbl.setStyleSheet(_transparent_label)
         job_row.addWidget(job_lbl)
         self.tag_job = TagSelector()
         self.tag_job.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
@@ -85,6 +90,7 @@ class Ui_MainWindow:
         grp_preview_layout = QVBoxLayout(grp_preview)
 
         self.lbl_sample_count = QLabel("対象サンプル: -")
+        self.lbl_sample_count.setStyleSheet(_transparent_label)
         grp_preview_layout.addWidget(self.lbl_sample_count)
 
         self.tbl_preview = QTableWidget()
