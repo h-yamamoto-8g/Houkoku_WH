@@ -149,11 +149,11 @@ class MainWindow(QMainWindow):
         self._ui.lbl_sample_count.setText(f"対象サンプル: {unique_samples}件 ({len(df)}行)")
 
         # Populate table
-        self._ui.tbl_preview.setRowCount(min(len(display), 200))
+        self._ui.tbl_preview.setRowCount(len(display))
         self._ui.tbl_preview.setColumnCount(len(display.columns))
         self._ui.tbl_preview.setHorizontalHeaderLabels(list(display.columns))
 
-        for row_idx in range(min(len(display), 200)):
+        for row_idx in range(len(display)):
             for col_idx, col_name in enumerate(display.columns):
                 val = display.iloc[row_idx, col_idx]
                 self._ui.tbl_preview.setItem(
