@@ -50,8 +50,8 @@ class TagButton(QFrame):
     def _update_style(self):
         if self._selected:
             self.setStyleSheet(
-                "TagButton { background: #A5D6A7; border: 1px solid #81C784; border-radius: 4px; }"
-                "QLabel { background: transparent; color: #2E7D32; font-weight: bold; }"
+                "TagButton { background: #C8E6C9; border: 1px solid #A5D6A7; border-radius: 4px; }"
+                "QLabel { background: transparent; color: #388E3C; font-weight: bold; }"
             )
         else:
             self.setStyleSheet(
@@ -81,13 +81,18 @@ class TagSelector(QWidget):
         self._scroll.setWidgetResizable(False)
         self._scroll.setFixedHeight(40)
         self._scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self._scroll.setStyleSheet(
+            "QScrollArea { background: transparent; border: 1px solid #BDBDBD; border-radius: 6px; }"
+        )
         self._scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self._scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         self._container = QWidget()
+        self._container.setStyleSheet("background: transparent;")
         self._hbox = QHBoxLayout(self._container)
-        self._hbox.setContentsMargins(0, 0, 0, 0)
+        self._hbox.setContentsMargins(4, 0, 4, 0)
         self._hbox.setSpacing(6)
+        self._hbox.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         self._hbox.setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
         self._container.setLayout(self._hbox)
         self._scroll.setWidget(self._container)
