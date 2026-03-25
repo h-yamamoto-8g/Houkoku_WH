@@ -151,6 +151,7 @@ class SettingsPage(QDialog):
         self._report_svc = report_svc
         self._dirty = False
         self._cached_samples: list[dict] | None = None  # lazily loaded from valid_samples.json
+        self._col_draft: list[ColumnSetting] = []
 
         self._init_data()
         self._connect_signals()
@@ -195,7 +196,6 @@ class SettingsPage(QDialog):
         self._ui.btn_browse_external.clicked.connect(self._on_browse_external)
 
         # Tab 5: Column Settings — edits stay in _col_draft until save
-        self._col_draft: list[ColumnSetting] = []
         self._ui.btn_col_save.clicked.connect(self._on_col_save)
         self._ui.btn_col_up.clicked.connect(self._on_col_up)
         self._ui.btn_col_down.clicked.connect(self._on_col_down)
