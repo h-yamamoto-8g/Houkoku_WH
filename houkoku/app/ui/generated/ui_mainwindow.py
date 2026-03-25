@@ -65,16 +65,15 @@ class Ui_MainWindow:
         row1.addWidget(self.cmb_report)
         grp_report_layout.addLayout(row1)
 
-        job_header = QHBoxLayout()
-        job_header.addWidget(QLabel("JOB番号:"))
-        job_header.addStretch()
+        job_row = QHBoxLayout()
+        job_row.addWidget(QLabel("JOB番号:"))
+        self.tag_job = TagSelector()
+        self.tag_job.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        job_row.addWidget(self.tag_job)
         self.btn_search = QPushButton("検索")
         self.btn_search.setFixedWidth(80)
-        job_header.addWidget(self.btn_search)
-        grp_report_layout.addLayout(job_header)
-
-        self.tag_job = TagSelector()
-        grp_report_layout.addWidget(self.tag_job)
+        job_row.addWidget(self.btn_search)
+        grp_report_layout.addLayout(job_row)
 
         root_layout.addWidget(grp_report)
 
