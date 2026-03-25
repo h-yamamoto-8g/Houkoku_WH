@@ -114,7 +114,7 @@ def filter_by_report(df: pd.DataFrame, search_filters: dict[str, list[str]]) -> 
     mask = df["request_protocol"].isin(protocol_names)
 
     if "test_report_value_flag" in df.columns:
-        mask = mask & (df["test_report_value_flag"] == True)  # noqa: E712
+        mask = mask & (df["test_report_value_flag"] == "YES")
 
     return df[mask].copy()
 
