@@ -89,11 +89,11 @@ class TagSelector(QWidget):
 
         self._container = QWidget()
         self._container.setStyleSheet("background: transparent;")
+        self._container.setFixedHeight(38)
         self._hbox = QHBoxLayout(self._container)
         self._hbox.setContentsMargins(4, 0, 4, 0)
         self._hbox.setSpacing(6)
         self._hbox.setAlignment(Qt.AlignmentFlag.AlignVCenter)
-        self._hbox.setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
         self._container.setLayout(self._hbox)
         self._scroll.setWidget(self._container)
 
@@ -114,7 +114,9 @@ class TagSelector(QWidget):
             self._tags.append(tag)
             self._hbox.addWidget(tag)
 
-        self._container.adjustSize()
+        # Resize width to fit all tags; height stays fixed for vertical centering
+        width = self._hbox.sizeHint().width() + self._hbox.contentsMargins().left() + self._hbox.contentsMargins().right()
+        self._container.setFixedWidth(max(width, self._scroll.viewport().width()))
 
     def clear(self) -> None:
         self.set_items([])
