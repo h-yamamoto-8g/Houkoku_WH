@@ -6,6 +6,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
+    QLayout,
     QScrollArea,
     QVBoxLayout,
     QWidget,
@@ -87,6 +88,7 @@ class TagSelector(QWidget):
         self._hbox = QHBoxLayout(self._container)
         self._hbox.setContentsMargins(0, 0, 0, 0)
         self._hbox.setSpacing(6)
+        self._hbox.setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
         self._container.setLayout(self._hbox)
         self._scroll.setWidget(self._container)
 
