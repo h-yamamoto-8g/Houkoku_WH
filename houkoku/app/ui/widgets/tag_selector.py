@@ -93,7 +93,7 @@ class TagSelector(QWidget):
         self._hbox = QHBoxLayout(self._container)
         self._hbox.setContentsMargins(4, 0, 4, 0)
         self._hbox.setSpacing(6)
-        self._hbox.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+        self._hbox.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         self._container.setLayout(self._hbox)
         self._scroll.setWidget(self._container)
 
