@@ -14,6 +14,7 @@ from typing import Optional
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QCheckBox,
     QDialog,
     QDialogButtonBox,
@@ -475,7 +476,7 @@ class SettingsPage(QDialog):
         self._ui.btn_col_save.setEnabled(True)
         # Allow editing only the display name column (col 2)
         self._ui.tbl_columns.setEditTriggers(
-            QTableWidget.EditTrigger.DoubleClicked | QTableWidget.EditTrigger.SelectedClicked
+            QAbstractItemView.EditTrigger.DoubleClicked | QAbstractItemView.EditTrigger.SelectedClicked
         )
         # Make column key (col 1) items non-editable, display name (col 2) editable
         for row in range(self._ui.tbl_columns.rowCount()):
@@ -498,7 +499,7 @@ class SettingsPage(QDialog):
         self._col_editing = False
         self._ui.btn_col_edit.setEnabled(True)
         self._ui.btn_col_save.setEnabled(False)
-        self._ui.tbl_columns.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self._ui.tbl_columns.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self._refresh_column_table()
 
     def _on_col_up(self) -> None:
