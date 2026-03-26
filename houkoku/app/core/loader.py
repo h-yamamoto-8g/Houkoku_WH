@@ -127,7 +127,7 @@ def get_unique_job_numbers(df: pd.DataFrame) -> list[str]:
     if "sample_job_number" not in df.columns:
         return []
     jobs = df["sample_job_number"].dropna().unique().tolist()
-    return sorted(jobs, reverse=True)
+    return sorted([j for j in jobs if j.strip()], reverse=True)
 
 
 def filter_by_job(df: pd.DataFrame, job_number: str) -> pd.DataFrame:
