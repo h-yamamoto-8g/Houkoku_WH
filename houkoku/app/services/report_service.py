@@ -244,8 +244,8 @@ class ReportService:
                     latest_dir / "trend_data.csv", trend_bytes
                 )
 
-            # --- history/{date}_{job}/ ---
-            history_dir = dept_dir / "history" / f"{date_str}_{job_number}"
+            # --- history/{date}_{report_name}/ ---
+            history_dir = dept_dir / "history" / f"{date_str}_{report.report_name}"
             history_dir.mkdir(parents=True, exist_ok=True)
             file_utils.safe_write_bytes_with_retry(
                 history_dir / "report_data.csv", csv_bytes
