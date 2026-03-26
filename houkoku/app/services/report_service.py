@@ -204,10 +204,9 @@ class ReportService:
 
             dept_df = split.get(dept.dept_id, pd.DataFrame())
             dept_dir = reports_dir / dept.folder_name
-            reports_base = dept_dir / "reports"
 
-            # --- reports/{date}_{report_name}/ ---
-            report_dir = reports_base / f"{date_str}_{report.report_name}"
+            # --- {date}_{report_name}/ ---
+            report_dir = dept_dir / f"{date_str}_{report.report_name}"
             report_dir.mkdir(parents=True, exist_ok=True)
 
             csv_path = report_dir / "report_data.csv"
