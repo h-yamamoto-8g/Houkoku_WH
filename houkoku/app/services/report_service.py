@@ -205,34 +205,13 @@ class ReportService:
             dept_df = split.get(dept.dept_id, pd.DataFrame())
             dept_dir = reports_dir / dept.folder_name
 
-            # --- reports/{date}_{report_name}/ ---
-            report_dir = dept_dir / "reports" / f"{date_str}_{report.report_name}"
-            report_dir.mkdir(parents=True, exist_ok=True)
+            # --- reports/{date}_{report_name}.csv ---
+            reports_base = dept_dir / "reports"
+            reports_base.mkdir(parents=True, exist_ok=True)
 
-            csv_path = report_dir / "report_data.csv"
+            csv_path = reports_base / f"{date_str}_{report.report_name}.csv"
             csv_bytes = dept_df.to_csv(index=False).encode("utf-8-sig")
             file_utils.safe_write_bytes_with_retry(csv_path, csv_bytes)
-
-            conditions = {
-                "report_id": report.report_id,
-                "report_name": report.report_name,
-                "display_name": report.display_name,
-                "job_number": job_number,
-                "protocol_name": ", ".join(
-                    report.search_filters.get("protocol_name", [])
-                ),
-                "created_at": timestamp,
-                "created_by": created_by,
-                "dept_id": dept.dept_id,
-                "dept_name": dept.dept_name,
-                "sample_count": len(
-                    dept_df["valid_sample_set_code"].unique() if not dept_df.empty else []
-                ),
-            }
-            cond_json = json.dumps(conditions, ensure_ascii=False, indent=2)
-            file_utils.safe_write_with_retry(
-                report_dir / "report_conditions.json", cond_json
-            )
 
             # --- trend_data/trend_data.csv (常に上書き) ---
             if self._df is not None:
