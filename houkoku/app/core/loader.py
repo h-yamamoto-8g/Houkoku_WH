@@ -33,7 +33,7 @@ def load_source_csv(path: Path) -> pd.DataFrame:
 
     for encoding in ("utf-8", "cp932", "shift_jis"):
         try:
-            df = pd.read_csv(path, encoding=encoding, low_memory=False)
+            df = pd.read_csv(path, encoding=encoding, dtype=str, keep_default_na=False)
             _fix_garbled_unit_names(df)
             return df
         except UnicodeDecodeError:
