@@ -65,6 +65,9 @@ class _ReportDialog(QDialog):
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
+        for btn in buttons.buttons():
+            btn.setAutoDefault(False)
+            btn.setDefault(False)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
@@ -107,6 +110,9 @@ class _DeptDialog(QDialog):
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
+        for btn in buttons.buttons():
+            btn.setAutoDefault(False)
+            btn.setDefault(False)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
@@ -137,6 +143,7 @@ class SettingsPage(QDialog):
         )
         self._report_svc = report_svc
         self._dirty = False
+        self._has_unsaved_changes = False
         self._cached_samples: list[dict] | None = None  # lazily loaded from valid_samples.json
 
         self._init_data()
@@ -210,6 +217,7 @@ class SettingsPage(QDialog):
             search_filters={"protocol_name": protocols},
         )
         self._config.report_definitions.append(new_report)
+        self._has_unsaved_changes = True
         self._refresh_report_table()
         self._refresh_perm_report_combo()
 
@@ -237,6 +245,7 @@ class SettingsPage(QDialog):
 
         r.report_name = report_name
         r.search_filters = {"protocol_name": protocols}
+        self._has_unsaved_changes = True
         self._refresh_report_table()
 
     def _on_delete_report(self) -> None:
@@ -251,6 +260,7 @@ class SettingsPage(QDialog):
         )
         if ans == QMessageBox.StandardButton.Yes:
             self._config.report_definitions.pop(row)
+            self._has_unsaved_changes = True
             self._refresh_report_table()
             self._refresh_perm_report_combo()
 
@@ -288,6 +298,7 @@ class SettingsPage(QDialog):
             folder_name=folder_name,
         )
         self._config.departments.append(new_dept)
+        self._has_unsaved_changes = True
         self._refresh_dept_table()
         self._refresh_dept_combo()
 
@@ -314,6 +325,7 @@ class SettingsPage(QDialog):
 
         d.dept_name = dept_name
         d.folder_name = folder_name
+        self._has_unsaved_changes = True
         self._refresh_dept_table()
         self._refresh_dept_combo()
 
@@ -329,6 +341,7 @@ class SettingsPage(QDialog):
         )
         if ans == QMessageBox.StandardButton.Yes:
             self._config.departments.pop(row)
+            self._has_unsaved_changes = True
             self._refresh_dept_table()
             self._refresh_dept_combo()
 
@@ -417,6 +430,7 @@ class SettingsPage(QDialog):
         ]
 
         dept.allowed_samples[report.report_id] = selected
+        self._has_unsaved_changes = True
         QMessageBox.information(self, "保存", "権限設定を保存しました。")
 
     # ---------- Tab 4: Path Settings ----------
@@ -477,15 +491,39 @@ class SettingsPage(QDialog):
         try:
             save_config(self._config)
             self._dirty = True
+            self._has_unsaved_changes = False
             self.accept()
         except FileNotFoundError as e:
             QMessageBox.critical(self, "エラー", str(e))
             self.reject()
 
+    def _confirm_discard(self) -> bool:
+        """Ask user whether to save, discard, or cancel. Returns True if dialog should close."""
+        if not self._has_unsaved_changes:
+            return True
+
+        ans = QMessageBox.question(
+            self,
+            "確認",
+            "変更が保存されていません。保存しますか？",
+            QMessageBox.StandardButton.Yes
+            | QMessageBox.StandardButton.No
+            | QMessageBox.StandardButton.Cancel,
+        )
+        if ans == QMessageBox.StandardButton.Yes:
+            self._save_and_accept()
+            return True
+        if ans == QMessageBox.StandardButton.No:
+            return True
+        # Cancel
+        return False
+
     def _on_close(self) -> None:
         self._save_and_accept()
 
     def closeEvent(self, event) -> None:  # noqa: N802
-        """Handle window close (×ボタン / Escキー) — save before closing."""
-        self._save_and_accept()
-        event.accept()
+        """Handle window close (×ボタン / Escキー) — confirm unsaved changes."""
+        if self._confirm_discard():
+            event.accept()
+        else:
+            event.ignore()
