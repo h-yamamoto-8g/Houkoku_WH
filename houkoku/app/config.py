@@ -160,10 +160,10 @@ def _derive_source_csv_path() -> Optional[Path]:
 
 
 def _derive_reports_path() -> Optional[Path]:
-    """Derive REPORTS_PATH from 課外データパス/報告書."""
+    """Derive REPORTS_PATH from 課外データパス."""
     if EXTERNAL_PATH is None:
         return None
-    return EXTERNAL_PATH / "報告書"
+    return EXTERNAL_PATH
 
 
 def _derive_config_dir_path() -> Optional[Path]:
