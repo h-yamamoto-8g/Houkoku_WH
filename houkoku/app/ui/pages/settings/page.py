@@ -495,7 +495,7 @@ class SettingsPage(QDialog):
             self.accept()
         except FileNotFoundError as e:
             QMessageBox.critical(self, "エラー", str(e))
-            self.reject()
+            super().reject()
 
     def _confirm_discard(self) -> bool:
         """Ask user whether to save, discard, or cancel. Returns True if dialog should close."""
@@ -521,8 +521,13 @@ class SettingsPage(QDialog):
     def _on_close(self) -> None:
         self._save_and_accept()
 
+    def reject(self) -> None:  # noqa: N802
+        """Override reject (Escキー / フォーカス喪失) — confirm unsaved changes."""
+        if self._confirm_discard():
+            super().reject()
+
     def closeEvent(self, event) -> None:  # noqa: N802
-        """Handle window close (×ボタン / Escキー) — confirm unsaved changes."""
+        """Handle window close (×ボタン) — confirm unsaved changes."""
         if self._confirm_discard():
             event.accept()
         else:
