@@ -62,6 +62,36 @@ def split_by_department(
     return result
 
 
+def filter_trend_data(
+    df: pd.DataFrame,
+    department: Department,
+    report_id: str,
+) -> pd.DataFrame:
+    """Extract trend data for a department (for graph use).
+
+    Filters by:
+      1. valid_sample_set_code in department's allowed_samples
+      2. test_status == "U"
+
+    Args:
+        df: Full source DataFrame (all jobs).
+        department: Department config.
+        report_id: Current report ID for permission lookup.
+
+    Returns:
+        Filtered DataFrame for trend/graph use.
+    """
+    allowed = department.allowed_samples.get(report_id, [])
+    if not allowed:
+        return df.iloc[0:0].copy()
+
+    mask = df["valid_sample_set_code"].isin(allowed)
+    if "test_status" in df.columns:
+        mask = mask & (df["test_status"] == "U")
+
+    return df[mask].copy()
+
+
 def compute_department_summary(
     df: pd.DataFrame,
     departments: list[Department],

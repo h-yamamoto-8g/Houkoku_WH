@@ -233,6 +233,16 @@ class ReportService:
                 latest_dir / "report_conditions.json", cond_json
             )
 
+            # --- trend_data.csv (latest/ only) ---
+            if self._df is not None:
+                trend_df = permission_store.filter_trend_data(
+                    self._df, dept, report.report_id
+                )
+                trend_bytes = trend_df.to_csv(index=False).encode("utf-8-sig")
+                file_utils.safe_write_bytes_with_retry(
+                    latest_dir / "trend_data.csv", trend_bytes
+                )
+
             # --- history/{date}_{job}/ ---
             history_dir = dept_dir / "history" / f"{date_str}_{job_number}"
             history_dir.mkdir(parents=True, exist_ok=True)
