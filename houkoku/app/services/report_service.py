@@ -204,12 +204,13 @@ class ReportService:
 
             dept_df = split.get(dept.dept_id, pd.DataFrame())
             dept_dir = reports_dir / dept.folder_name
+            reports_base = dept_dir / "reports"
 
-            # --- latest/ ---
-            latest_dir = dept_dir / "latest"
-            latest_dir.mkdir(parents=True, exist_ok=True)
+            # --- reports/{date}_{report_name}/ ---
+            report_dir = reports_base / f"{date_str}_{report.report_name}"
+            report_dir.mkdir(parents=True, exist_ok=True)
 
-            csv_path = latest_dir / "report_data.csv"
+            csv_path = report_dir / "report_data.csv"
             csv_bytes = dept_df.to_csv(index=False).encode("utf-8-sig")
             file_utils.safe_write_bytes_with_retry(csv_path, csv_bytes)
 
@@ -231,28 +232,20 @@ class ReportService:
             }
             cond_json = json.dumps(conditions, ensure_ascii=False, indent=2)
             file_utils.safe_write_with_retry(
-                latest_dir / "report_conditions.json", cond_json
+                report_dir / "report_conditions.json", cond_json
             )
 
-            # --- trend_data.csv (latest/ only) ---
+            # --- trend_data/trend_data.csv (常に上書き) ---
             if self._df is not None:
+                trend_dir = dept_dir / "trend_data"
+                trend_dir.mkdir(parents=True, exist_ok=True)
                 trend_df = permission_store.filter_trend_data(
                     self._df, dept, report.report_id
                 )
                 trend_bytes = trend_df.to_csv(index=False).encode("utf-8-sig")
                 file_utils.safe_write_bytes_with_retry(
-                    latest_dir / "trend_data.csv", trend_bytes
+                    trend_dir / "trend_data.csv", trend_bytes
                 )
-
-            # --- history/{date}_{report_name}/ ---
-            history_dir = dept_dir / "history" / f"{date_str}_{report.report_name}"
-            history_dir.mkdir(parents=True, exist_ok=True)
-            file_utils.safe_write_bytes_with_retry(
-                history_dir / "report_data.csv", csv_bytes
-            )
-            file_utils.safe_write_with_retry(
-                history_dir / "report_conditions.json", cond_json
-            )
 
             exported[dept.dept_id] = csv_path
 
