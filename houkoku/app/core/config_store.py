@@ -23,6 +23,7 @@ class ReportDefinition:
 
     report_id: str = ""
     report_name: str = ""
+    display_name: str = ""
     search_filters: dict[str, list[str]] = field(default_factory=dict)
     description: str = ""
 
@@ -62,6 +63,7 @@ def _report_def_from_dict(d: dict) -> ReportDefinition:
     return ReportDefinition(
         report_id=d.get("report_id", ""),
         report_name=d.get("report_name", ""),
+        display_name=d.get("display_name", ""),
         search_filters=d.get("search_filters", {}),
         description=d.get("description", ""),
     )

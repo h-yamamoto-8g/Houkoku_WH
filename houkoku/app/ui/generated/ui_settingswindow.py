@@ -66,8 +66,8 @@ class Ui_SettingsWindow:
         tab_reports_layout = QVBoxLayout(tab_reports)
 
         self.tbl_reports = QTableWidget()
-        self.tbl_reports.setColumnCount(3)
-        self.tbl_reports.setHorizontalHeaderLabels(["報告書ID", "報告書名", "検索条件"])
+        self.tbl_reports.setColumnCount(4)
+        self.tbl_reports.setHorizontalHeaderLabels(["報告書ID", "報告書名", "お気に入り名", "検索条件"])
         self.tbl_reports.horizontalHeader().setStretchLastSection(True)
         self.tbl_reports.horizontalHeader().setSectionResizeMode(
             QHeaderView.ResizeMode.ResizeToContents

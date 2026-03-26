@@ -45,6 +45,7 @@ class _ReportDialog(QDialog):
         *,
         title: str = "報告書",
         report_name: str = "",
+        display_name: str = "",
         protocols: str = "",
     ) -> None:
         super().__init__(parent)
@@ -56,6 +57,9 @@ class _ReportDialog(QDialog):
 
         self.txt_name = QLineEdit(report_name)
         form.addRow("報告書名:", self.txt_name)
+
+        self.txt_display_name = QLineEdit(display_name)
+        form.addRow("お気に入り名:", self.txt_display_name)
 
         self.txt_protocols = QLineEdit(protocols)
         form.addRow("検索条件（プロトコル名、カンマ区切り）:", self.txt_protocols)
@@ -72,13 +76,14 @@ class _ReportDialog(QDialog):
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
-    def get_values(self) -> tuple[str, list[str]]:
-        """Return (report_name, protocol_list)."""
+    def get_values(self) -> tuple[str, str, list[str]]:
+        """Return (report_name, display_name, protocol_list)."""
         name = self.txt_name.text().strip()
+        display_name = self.txt_display_name.text().strip()
         protocols = [
             p.strip() for p in self.txt_protocols.text().split(",") if p.strip()
         ]
-        return name, protocols
+        return name, display_name, protocols
 
 
 class _DeptDialog(QDialog):
@@ -196,15 +201,16 @@ class SettingsPage(QDialog):
         for i, r in enumerate(self._config.report_definitions):
             tbl.setItem(i, 0, QTableWidgetItem(r.report_id))
             tbl.setItem(i, 1, QTableWidgetItem(r.report_name))
+            tbl.setItem(i, 2, QTableWidgetItem(r.display_name))
             protocols = ", ".join(r.search_filters.get("protocol_name", []))
-            tbl.setItem(i, 2, QTableWidgetItem(protocols))
+            tbl.setItem(i, 3, QTableWidgetItem(protocols))
 
     def _on_add_report(self) -> None:
         dlg = _ReportDialog(self, title="報告書追加")
         if dlg.exec() != QDialog.DialogCode.Accepted:
             return
 
-        report_name, protocols = dlg.get_values()
+        report_name, display_name, protocols = dlg.get_values()
         if not report_name:
             QMessageBox.warning(self, "警告", "報告書名を入力してください。")
             return
@@ -214,6 +220,7 @@ class SettingsPage(QDialog):
         new_report = ReportDefinition(
             report_id=report_id,
             report_name=report_name,
+            display_name=display_name,
             search_filters={"protocol_name": protocols},
         )
         self._config.report_definitions.append(new_report)
@@ -233,17 +240,19 @@ class SettingsPage(QDialog):
             self,
             title="報告書編集",
             report_name=r.report_name,
+            display_name=r.display_name,
             protocols=", ".join(r.search_filters.get("protocol_name", [])),
         )
         if dlg.exec() != QDialog.DialogCode.Accepted:
             return
 
-        report_name, protocols = dlg.get_values()
+        report_name, display_name, protocols = dlg.get_values()
         if not report_name:
             QMessageBox.warning(self, "警告", "報告書名を入力してください。")
             return
 
         r.report_name = report_name
+        r.display_name = display_name
         r.search_filters = {"protocol_name": protocols}
         self._has_unsaved_changes = True
         self._refresh_report_table()

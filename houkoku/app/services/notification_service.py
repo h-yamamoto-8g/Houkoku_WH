@@ -39,6 +39,7 @@ def create_notification(
     return {
         "report_id": report.report_id,
         "report_name": report.report_name,
+        "display_name": report.display_name,
         "job_number": job_number,
         "sent_at": datetime.now().isoformat(timespec="seconds"),
         "sent_by": sent_by,

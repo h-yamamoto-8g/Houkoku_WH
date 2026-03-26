@@ -216,6 +216,7 @@ class ReportService:
             conditions = {
                 "report_id": report.report_id,
                 "report_name": report.report_name,
+                "display_name": report.display_name,
                 "job_number": job_number,
                 "protocol_name": ", ".join(
                     report.search_filters.get("protocol_name", [])
