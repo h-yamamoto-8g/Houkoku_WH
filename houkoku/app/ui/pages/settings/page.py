@@ -519,7 +519,8 @@ class SettingsPage(QDialog):
         return False
 
     def _on_close(self) -> None:
-        self._save_and_accept()
+        if self._confirm_discard():
+            super().reject()
 
     def reject(self) -> None:  # noqa: N802
         """Override reject (Escキー / フォーカス喪失) — confirm unsaved changes."""
